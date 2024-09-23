@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_lin_map_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_lin_map" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="11611fs"></ZoomEndTime>
+      <Cursor1Time time="6400fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="175"></NameColumnWidth>
+      <ValueColumnWidth column_width="125"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="/tb_lin_map/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lin_map/DataInxDI" type="array">
+      <obj_property name="ElementShortName">DataInxDI[7:0]</obj_property>
+      <obj_property name="ObjectShortName">DataInxDI[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lin_map/DataOutxDO" type="array">
+      <obj_property name="ElementShortName">DataOutxDO[7:0]</obj_property>
+      <obj_property name="ObjectShortName">DataOutxDO[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lin_map/T" type="other">
+      <obj_property name="ElementShortName">T</obj_property>
+      <obj_property name="ObjectShortName">T</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lin_map/Td" type="other">
+      <obj_property name="ElementShortName">Td</obj_property>
+      <obj_property name="ObjectShortName">Td</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lin_map/MATRIX_SEL" type="array">
+      <obj_property name="ElementShortName">MATRIX_SEL[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MATRIX_SEL[31:0]</obj_property>
+   </wvobject>
+</wave_config>

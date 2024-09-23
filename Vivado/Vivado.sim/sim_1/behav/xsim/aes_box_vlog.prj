@@ -1,0 +1,17 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../../gf2_mul.v" \
+"../../../../../inverter.v" \
+"../../../../../lin_map.v" \
+"../../../../../real_dom_shared_mul_gf2.v" \
+"../../../../../real_dom_shared_mul_gf4.v" \
+"../../../../../shared_mul_gf2.v" \
+"../../../../../shared_mul_gf4.v" \
+"../../../../../square_scaler.v" \
+"../../../../../aes_sbox.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

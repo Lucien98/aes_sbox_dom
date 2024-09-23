@@ -1,0 +1,7 @@
+Running: xsim.dir/tb_real_dom_shared_mul_gf2_behav/xsimk.exe -simmode gui -wdb tb_real_dom_shared_mul_gf2_behav.wdb -simrunnum 0 -socket 56246
+Design successfully loaded
+Design Loading Memory Usage: 6072 KB (Peak: 6072 KB)
+Design Loading CPU Usage: 0 ms
+Simulation completed
+Simulation Memory Usage: 6780 KB (Peak: 6780 KB)
+Simulation CPU Usage: 0 ms

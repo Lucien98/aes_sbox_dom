@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IMPORTANT: This is an internal file that has been generated
+     by the Xilinx ISE software.  Any direct editing or
+     changes made to this file may result in unpredictable
+     behavior or data corruption.  It is strongly advised that
+     users do not edit the contents of this file. -->
+<messages>
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 40: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 39: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 54: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 53: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 70: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 69: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 89: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 88: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 95: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 94: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 116: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 136: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 134: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf2.v" Line 133: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 32: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 31: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 40: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 39: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 56: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 55: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 75: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 74: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 81: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 80: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 102: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 122: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 120: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\shared_mul_gf4.v" Line 119: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 29: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 28: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 38: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 37: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 74: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 73: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 96: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 104: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 135: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 186: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 191: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 207: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 225: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 236: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 242: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 253: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 258: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 89: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf2.v" Line 185: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 29: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 28: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 38: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 37: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 74: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 73: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 92: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 98: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 127: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 155: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 160: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 176: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 194: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 205: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 211: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 222: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 227: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 85: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="991" delta="old" >"C:\Users\ygh\Desktop\0830\1\real_dom_shared_mul_gf4.v" Line 154: Event expressions must result in a singular type
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 37: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 36: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 67: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 66: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 85: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 98: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 106: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\inverter.v" Line 117: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 45: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 44: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 91: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 90: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 111: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 141: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="1490" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 151: Loop valiable declaration is not allowed in this mode of verilog
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 165: Block identifier is required on this block
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="248" delta="old" >"C:\Users\ygh\Desktop\0830\1\aes_sbox.v" Line 198: Block identifier is required on this block
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_0</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_0&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_1</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_1&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_2</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_2&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/b_mul_e/YxDP_0_0</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_e/YxDP_0_0&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_3</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_3&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/b_mul_e/YxDP_0_1</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_e/YxDP_0_1&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_2</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_2&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_4</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_4&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_5</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_5&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_7</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_7&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_4</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_4&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_5</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_5&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_6</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_6&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/b_mul_e/YxDP_0_2</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_e/YxDP_0_2&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y1_0xDP_0_7</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/XxDP_0_7&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/b_mul_e/YxDP_0_3</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_e/YxDP_0_3&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/BxDP_0_0</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/YxDP_0_0&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/BxDP_0_1</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/YxDP_0_1&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/AxDP_0_0</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/XxDP_0_0&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/AxDP_0_1</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/XxDP_0_1&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_6</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_6&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/BxDP_0_2</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/YxDP_0_2&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/BxDP_0_3</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/YxDP_0_3&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/AxDP_0_2</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/XxDP_0_2&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">inverter_gf24/AxDP_0_3</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inverter_gf24/a_mul_b/XxDP_0_3&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_0</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_0&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_1</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_1&gt; </arg>
+</msg>
+
+<msg type="info" file="Xst" num="2261" delta="new" >The FF/Latch &lt;<arg fmt="%s" index="1">Y0_0xDP_0_3</arg>&gt; in Unit &lt;<arg fmt="%s" index="2">aes_box</arg>&gt; is equivalent to the following <arg fmt="%s" index="3">FF/Latch</arg>, which will be removed : <arg fmt="%s" index="4">&lt;inst_real_dom_shared_mul_gf4/YxDP_0_3&gt; </arg>
+</msg>
+
+</messages>
+

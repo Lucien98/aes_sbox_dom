@@ -1,0 +1,6 @@
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/aes_box.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx75-csg484-2 aes_box.ngc aes_box.ngd  
+map -intstyle ise -p xc6slx75-csg484-2 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o aes_box_map.ncd aes_box.ngd aes_box.pcf 
+par -w -intstyle ise -ol high -mt off aes_box_map.ncd aes_box.ncd aes_box.pcf 
+trce -intstyle ise -v 3 -s 2 -n 3 -fastpaths -xml aes_box.twx aes_box.ncd -o aes_box.twr aes_box.pcf 
+bitgen -intstyle ise -f aes_box.ut aes_box.ncd 

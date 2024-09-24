@@ -1,0 +1,7 @@
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.syr" 
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.syr" 
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.syr" 
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.syr" 
+xst -intstyle ise -ifn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.xst" -ofn "C:/Users/ygh/Desktop/0830/1/test1/tb_aes_box.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx75-csg484-2 tb_aes_box.ngc tb_aes_box.ngd  
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx75-csg484-2 tb_aes_box.ngc tb_aes_box.ngd  

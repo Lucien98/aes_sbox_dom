@@ -96,9 +96,9 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         if (~RstxBI) begin // asynchronous reset (active low)
             // iterate over shares
             for (integer i = 0; i < SHARES; i = i + 1) begin
-                AxDP[i] <= 2'b00;
-                BxDP[i] <= 2'b00;
-                CxDP[i] <= 2'b00;
+                AxDP[i] = 2'b00;
+                BxDP[i] = 2'b00;
+                CxDP[i] = 2'b00;
             end
         end
         else begin // rising clock edge

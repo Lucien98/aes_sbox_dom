@@ -139,12 +139,12 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         if (~RstxBI) begin // asynchronous reset (active low)
             // per share
             for (integer i = 0; i < SHARES; i = i + 1) begin
-                Y0_0xDP[i] <= 4'b0000;
-                Y0_1xDP[i] <= 4'b0000;
-                Y0_2xDP[i] <= 4'b0000;
-                Y1_0xDP[i] <= 4'b0000;
-                Y1_1xDP[i] <= 4'b0000;
-                Y1_2xDP[i] <= 4'b0000;
+                Y0_0xDP[i] = 4'b0000;
+                Y0_1xDP[i] = 4'b0000;
+                Y0_2xDP[i] = 4'b0000;
+                Y1_0xDP[i] = 4'b0000;
+                Y1_1xDP[i] = 4'b0000;
+                Y1_2xDP[i] = 4'b0000;
             end
         end
         else begin // rising clock edge
@@ -174,7 +174,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         assign Y0xorY1xD[i] = Y1xD[i] ^ Y0xD[i];
 
         // Square sclaer
-        square_scaler #()
+        square_scaler
         square_scaler_gf24 (
             .DataInxDI(Y0xorY1xD[i]),
             .DataOutxDO(Y0xorY12xD[i])

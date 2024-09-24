@@ -82,7 +82,7 @@ module tb_aes_box ();
         ClkxCI = 0;
 		RstxBI = 0;
         for (integer k = 0; k < SHARES; k=k+1) begin
-			XxDI[k] <= 0;
+			XxDI[k] = 0;
 			/* code */
 		end
 		#T;

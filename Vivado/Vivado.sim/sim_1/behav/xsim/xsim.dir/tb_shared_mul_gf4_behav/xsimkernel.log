@@ -1,7 +1,0 @@
-Running: xsim.dir/tb_shared_mul_gf4_behav/xsimk.exe -simmode gui -wdb tb_shared_mul_gf4_behav.wdb -simrunnum 0 -socket 50026
-Design successfully loaded
-Design Loading Memory Usage: 6132 KB (Peak: 6132 KB)
-Design Loading CPU Usage: 31 ms
-Simulation completed
-Simulation Memory Usage: 7156 KB (Peak: 7156 KB)
-Simulation CPU Usage: 31 ms

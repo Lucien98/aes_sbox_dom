@@ -1,8 +1,0 @@
-INTSTYLE=ise
-INFILE=C:\Users\ygh\Desktop\0830\1\test1\aes_box.ncd
-OUTFILE=C:\Users\ygh\Desktop\0830\1\test1\aes_box.bit
-FAMILY=Spartan6
-PART=xc6slx75-2csg484
-WORKINGDIR=C:\Users\ygh\Desktop\0830\1\test1
-LICENSE=WebPack
-USER_INFO=__0_0_0

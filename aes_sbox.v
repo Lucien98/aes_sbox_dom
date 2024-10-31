@@ -82,7 +82,7 @@ wire [4*SHARES-1 : 0] _Y1_2xDP;
 reg [3:0] Y1_3xDP [SHARES-1:0];
 reg [3:0] Y1_4xDP [SHARES-1:0];
 reg [3:0] Y0xorY12xDP [SHARES-1:0];
-wire [7:0] mappedxDP [SHARES-1:0];
+reg [7:0] mappedxDP [SHARES-1:0];
 wire [3:0] InverterInxDP [SHARES-1:0];
 
 
@@ -109,7 +109,7 @@ end
 
 // General: Define aliases
 for (genvar i = 0; i < SHARES; i = i + 1) begin
-    if (PIPELINED == 1 && EIGHT_STAGED == 1) begin
+    if (PIPELINED == 1 && EIGHT_STAGED == 0) begin
         assign Y1xD[i][3] = mappedxDP[i][7];
         assign Y1xD[i][2] = mappedxDP[i][6];
         assign Y1xD[i][1] = mappedxDP[i][5];
@@ -133,6 +133,21 @@ end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
 if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
+    // Add pipelining stage after linear mapping at input,
+    // between Stage 1 and 2
+    always @(posedge ClkxCI or negedge RstxBI) begin
+    begin  // process pipeline_lin_map_p
+      if (~RstxBI) begin              // asynchronous reset (active low)
+        for (integer i = 0; i < SHARES; i = i + 1)
+          mappedxDP[i]     <= 8'b0000;
+        end //i
+      else begin  // rising clock edge
+        for (integer i = 0; i < SHARES; i = i + 1)
+          mappedxDP[i]     <= mappedxD[i];
+        end //i
+      end
+    end
+    
     // Pipeline for Y0 and Y1
     // process pipeline_y0y1_p
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_

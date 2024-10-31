@@ -147,7 +147,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
 
         gf2_mul #(.N(2)) x_times_b(
             .AxDI(XxDI[i]),
-            .BxDI(BxDI[i]),
+            .BxDI(BxDI[0]),
             .QxDO(X_times_BxD[i])
         );
     end

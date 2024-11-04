@@ -41,8 +41,10 @@ output [8*SHARES-1 : 0] _QxDO;
 wire [7:0] XxDI [SHARES-1 : 0];
 wire [7:0] QxDO [SHARES-1 : 0];
 
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 8; j=j+1) begin
+genvar i;
+genvar j;
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 8; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*8+j];
         assign _QxDO[i*8+j] = QxDO[i][j];
     end
@@ -55,9 +57,11 @@ wire [4*SHARES-1 : 0] _Y1xD;
 wire [3:0] Y0xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0xD;
 wire [3:0] Y0xorY1xD [SHARES-1:0];
-wire [3:0] Y0xorY12xD [SHARES-1:0];
-wire [3:0] Y0mulY1xD [SHARES-1:0];
-wire [4*SHARES-1 : 0] _Y0mulY1xD;
+// wire [3:0] Y0xorY12xD [SHARES-1:0];
+// wire [3:0] Y0mulY1xD [SHARES-1:0];
+// wire [4*SHARES-1 : 0] _Y0mulY1xD;
+wire [3:0] Y0sqscmulY1xD [SHARES-1:0];
+wire [4*SHARES-1 : 0] _Y0sqscmulY1xD;
 wire [3:0] InverterInxD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _InverterInxD;
 wire [3:0] InverterOutxD [SHARES-1:0];
@@ -81,18 +85,18 @@ reg [3:0] Y1_2xDP [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y1_2xDP;
 reg [3:0] Y1_3xDP [SHARES-1:0];
 reg [3:0] Y1_4xDP [SHARES-1:0];
-reg [3:0] Y0xorY12xDP [SHARES-1:0];
-reg [7:0] mappedxDP [SHARES-1:0];
+// reg [3:0] Y0xorY12xDP [SHARES-1:0];
+wire [7:0] mappedxDP [SHARES-1:0];
 wire [3:0] InverterInxDP [SHARES-1:0];
 
 
-
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 4; j=j+1) begin
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 4; j=j+1) begin
         // Used in real_dom_shared_mul_gf4
         assign _Y1xD[i*4+j] = Y1xD[i][j];
         assign _Y0xD[i*4+j] = Y0xD[i][j];
-        assign Y0mulY1xD[i][j] = _Y0mulY1xD[i*4+j];
+        // assign Y0mulY1xD[i][j] = _Y0mulY1xD[i*4+j];
+        assign Y0sqscmulY1xD[i][j] = _Y0sqscmulY1xD[i*4+j];
 
         // Used in inverter
         assign _InverterInxD[i*4+j] = InverterInxD[i][j];
@@ -108,8 +112,8 @@ end
 
 
 // General: Define aliases
-for (genvar i = 0; i < SHARES; i = i + 1) begin
-    if (PIPELINED == 1 && EIGHT_STAGED == 0) begin
+for (i = 0; i < SHARES; i = i + 1) begin
+    if (PIPELINED == 1 && EIGHT_STAGED == 1) begin
         assign Y1xD[i][3] = mappedxDP[i][7];
         assign Y1xD[i][2] = mappedxDP[i][6];
         assign Y1xD[i][1] = mappedxDP[i][5];
@@ -133,51 +137,38 @@ end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
 if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
-    // Add pipelining stage after linear mapping at input,
-    // between Stage 1 and 2
-    always @(posedge ClkxCI or negedge RstxBI) begin
-    begin  // process pipeline_lin_map_p
-      if (~RstxBI) begin              // asynchronous reset (active low)
-        for (integer i = 0; i < SHARES; i = i + 1)
-          mappedxDP[i]     <= 8'b0000;
-        end //i
-      else begin  // rising clock edge
-        for (integer i = 0; i < SHARES; i = i + 1)
-          mappedxDP[i]     <= mappedxD[i];
-        end //i
-      end
-    end
-    
     // Pipeline for Y0 and Y1
     // process pipeline_y0y1_p
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    // always @(posedge ClkxCI) begin : proc_
+        integer k;
         if (~RstxBI) begin // asynchronous reset (active low)
             // per share
-            for (integer i = 0; i < SHARES; i = i + 1) begin
-                Y0_0xDP[i] = 4'b0000;
-                Y0_1xDP[i] = 4'b0000;
-                Y0_2xDP[i] = 4'b0000;
-                Y1_0xDP[i] = 4'b0000;
-                Y1_1xDP[i] = 4'b0000;
-                Y1_2xDP[i] = 4'b0000;
+            for (k = 0; k < SHARES; k = k + 1) begin
+                Y0_0xDP[k] = 4'b0000;
+                Y0_1xDP[k] = 4'b0000;
+                Y0_2xDP[k] = 4'b0000;
+                Y1_0xDP[k] = 4'b0000;
+                Y1_1xDP[k] = 4'b0000;
+                Y1_2xDP[k] = 4'b0000;
             end
         end
         else begin // rising clock edge
-            for (integer i = 0; i < SHARES; i = i + 1) begin
+            for (k = 0; k < SHARES; k = k + 1) begin
                 
-                Y0_2xDP[i] = Y0_1xDP[i];
-                Y0_1xDP[i] = Y0_0xDP[i];
-                Y0_0xDP[i] = Y0xD[i];
-                Y1_2xDP[i] = Y1_1xDP[i];
-                Y1_1xDP[i] = Y1_0xDP[i];
-                Y1_0xDP[i] = Y1xD[i];
-                Y0xorY12xDP[i] = Y0xorY12xD[i];
+                Y0_2xDP[k] = Y0_1xDP[k];
+                Y0_1xDP[k] = Y0_0xDP[k];
+                Y0_0xDP[k] = Y0xD[k];
+                Y1_2xDP[k] = Y1_1xDP[k];
+                Y1_1xDP[k] = Y1_0xDP[k];
+                Y1_0xDP[k] = Y1xD[k];
+                // Y0xorY12xDP[k] = Y0xorY12xD[k];
             end
         end
     end
 
     // Generate instances per share...
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
         lin_map #(.MATRIX_SEL(1))
         input_mapping (
@@ -185,6 +176,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataOutxDO(mappedxD[i])
         );
 
+        /*
         // Input is split up in Y1 and Y0
         assign Y0xorY1xD[i] = Y1xD[i] ^ Y0xD[i];
 
@@ -194,9 +186,11 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataInxDI(Y0xorY1xD[i]),
             .DataOutxDO(Y0xorY12xD[i])
         );
+        */
 
         // Inverter input
-        assign InverterInxD[i] = Y0mulY1xD[i] ^ Y0xorY12xDP[i];
+        // assign InverterInxD[i] = Y0mulY1xD[i] ^ Y0xorY12xDP[i];
+        assign InverterInxD[i] = Y0sqscmulY1xD[i];
 
         // Inverse linear mapping
         assign InvUnmappedxD[i] = {InverseMSBxD[i], InverseLSBxD[i]};
@@ -210,7 +204,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     end
 
     // Output
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
         if (i > 0) begin
             assign QxDO[i] = InvMappedxD[i];
         end
@@ -220,6 +214,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     end
 
     // Single instances:
+    /*
     // Multiply Y1 and Y0 (GF 2^4)
     real_dom_shared_mul_gf4 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     inst_real_dom_shared_mul_gf4 (
@@ -230,6 +225,17 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._ZxDI(_Zmul1xDI),
         ._BxDI(_Bmul1xDI),
         ._QxDO(_Y0mulY1xD)
+    );
+    */
+    // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
+    shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_Y1xD),
+        ._YxDI(_Y0xD),
+        ._ZxDI(_Zmul1xDI),
+        ._QxDO(_Y0sqscmulY1xD)
     );
 
     // Inverter in GF2^4

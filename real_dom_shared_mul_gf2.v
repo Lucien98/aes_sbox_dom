@@ -25,8 +25,10 @@ wire [1:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
 wire [1:0] BxDI [SHARES-1 : 0];
 wire [1:0] QxDO [SHARES-1 : 0];
 
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 2; j=j+1) begin
+genvar i;
+genvar j;
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*2+j];
         assign YxDI[i][j] = _YxDI[i*2+j];
         assign BxDI[i][j] = _BxDI[i*2+j];
@@ -34,8 +36,8 @@ for (genvar i = 0; i < SHARES; i=i+1) begin
     end
 end
 
-for (genvar i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
-    for (genvar j = 0; j < 2; j=j+1) begin
+for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
         assign ZxDI[i][j] = _ZxDI[i*2+j];
     end
 end
@@ -70,8 +72,8 @@ wire [1:0] X_times_B_remaskedxDN [SHARES-1 : 0];
 reg [1:0] X_times_B_remaskedxDP [SHARES-1 : 0];
 
 
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 2; j=j+1) begin
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
         assign XtimesBxD[i][j] = _XtimesBxD[i*2+j];
     end
 end
@@ -86,14 +88,15 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     assign BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
     */
 
-    always @(BxDI or X_times_BxD or XxDI or XxDP or YxDI or YxDP or ZxDI or XtimesYxS or XtimesBlindedY or X_times_B_remaskedxDP) begin
+    //always @(BxDI or X_times_BxD or XxDI or XxDP or YxDI or YxDP or ZxDI or XtimesYxS or XtimesBlindedY or X_times_B_remaskedxDP) begin
+    always @(*) begin
         BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
         BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
     end
 
     // Select inputs for multipliers depending if pipelining is used
     if (PIPELINED == 1) begin
-        for (genvar i = 0; i < SHARES; i = i + 1) begin
+        for (i = 0; i < SHARES; i = i + 1) begin
             assign XxD[i][0] = XxDP[i][0];
             assign XxD[i][1] = XxDP[i][1];
             assign YxD[i][0] = YxDP[i][0];
@@ -101,7 +104,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
         end
     end
     else begin
-        for (genvar i = 0; i < SHARES; i = i + 1) begin
+        for (i = 0; i < SHARES; i = i + 1) begin
             assign XxD[i][0] = XxDI[i][0];
             assign XxD[i][1] = XxDI[i][1];
             assign YxD[i][0] = YxDI[i][0];
@@ -121,6 +124,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     // Remask multiplication results from different domains
     // process x_times_b_register_p
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    // always @(posedge ClkxCI) begin : proc_
         if (~RstxBI) begin // asynchronous reset (active low)
             X_times_B_remaskedxDP[0] <= 2'b00;
             X_times_B_remaskedxDP[1] <= 2'b00;
@@ -132,7 +136,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     end
 
     // Multipliers
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
         gf2_mul #(.N(2)) x_times_y(
             .AxDI(XxD[i]),
             .BxDI(YxD[i]),
@@ -157,54 +161,32 @@ end
 
 // NO First_order optimized variant
 if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
-    /*
-    // Blinded input Y
-    wire [1:0] SumBlindedY; // 累加赋值？？？
-    // process blind_y_p
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
-        assign BlindedYxDN[i] = BlindedYxDP[i];
-    end
-    assign SumBlindedY = 2'b00;
-    // per share
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
-        assign BlindedYxDN[i] = YxDI[i] ^ BxDI[i];
-        // Sum of blinded Y
-        assign SumBlindedY = SumBlindedY ^ BlindedYxDP[i];
-        // X input for GF mults => x * (y + z)
-        if (PIPELINED == 1) begin
-            assign XpipelinedOrNotxS[i] = XxDP[i];
-        end
-        else begin
-            assign XpipelinedOrNotxS[i] = XxDI[i];
-        end
-    end
-    assign SumBlindedYxD = SumBlindedY;
-    */
     reg [1:0] SumBlindedY;
-    
-    always @(BlindedYxDP or BxDI or XxDI or XxDP or YxDI) begin
-        for (integer i = 0; i < SHARES; i = i + 1) begin
-            BlindedYxDN[i] = BlindedYxDP[i];
+    integer k;
+    //always @(BlindedYxDP or BxDI or XxDI or XxDP or YxDI) begin
+    always @(*) begin
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDN[k] = BlindedYxDP[k];
         end
         SumBlindedY = 2'b00;
         // per share
-        for (integer i = 0; i < SHARES; i = i + 1) begin
-            BlindedYxDN[i] = YxDI[i] ^ BxDI[i];
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDN[k] = YxDI[k] ^ BxDI[k];
             // Sum of blinded Y
-            SumBlindedY = SumBlindedY ^ BlindedYxDP[i];
+            SumBlindedY = SumBlindedY ^ BlindedYxDP[k];
             // X input for GF mults => x * (y + z)
             if (PIPELINED == 1) begin
-                XpipelinedOrNotxS[i] = XxDP[i];
+                XpipelinedOrNotxS[k] = XxDP[k];
             end
             else begin
-                XpipelinedOrNotxS[i] = XxDI[i];
+                XpipelinedOrNotxS[k] = XxDI[k];
             end
         end
         SumBlindedYxD = SumBlindedY;
     end
 
     // Generate multipliers calculating x * (sum(y+b))
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
             gf2_mul #(.N(2)) gf2_mul(
             .AxDI(XpipelinedOrNotxS[i]),
             .BxDI(SumBlindedYxD),
@@ -222,7 +204,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
     );
 
     // Output signal x*y = x*(y+b) + x*b
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
         assign QxDO[i] = XtimesSumBlindedYxD[i] ^ XtimesBxD[i];
     end
 end
@@ -232,16 +214,18 @@ end
 // Use pipelining --> X needs to be registered
 if (PIPELINED == 1) begin
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    // always @(posedge ClkxCI) begin : proc_
+        integer k;
         if (~RstxBI) begin // asynchronous reset (active low)
-            for (integer i = 0; i < SHARES; i = i + 1) begin
-                XxDP[i] = 2'b00;
-                YxDP[i] = 2'b00;
+            for (k = 0; k < SHARES; k = k + 1) begin
+                XxDP[k] = 2'b00;
+                YxDP[k] = 2'b00;
             end
         end
         else begin // rising clock edge
-            for (integer i = 0; i < SHARES; i = i + 1) begin
-                XxDP[i] = XxDI[i];
-                YxDP[i] = YxDI[i];
+            for (k = 0; k < SHARES; k = k + 1) begin
+                XxDP[k] = XxDI[k];
+                YxDP[k] = YxDI[k];
             end
         end
     end
@@ -249,14 +233,16 @@ end
 
 // Blinding register process
 always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+// always @(posedge ClkxCI) begin : proc_
+    integer k;
     if (~RstxBI) begin // asynchronous reset (active low)
-        for (integer i = 0; i < SHARES; i = i + 1) begin
-            BlindedYxDP[i] <= 2'b00;
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDP[k] <= 2'b00;
         end
     end
     else begin // rising clock edge
-        for (integer i = 0; i < SHARES; i = i + 1) begin
-            BlindedYxDP[i] <= BlindedYxDN[i];
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDP[k] <= BlindedYxDN[k];
         end
     end
 end

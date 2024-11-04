@@ -32,16 +32,31 @@ module tb_inverter ();
         end
     end
 
+    reg [3:0] X;
+    reg [3:0] Q;
+
     for (genvar i = 0; i < SHARES*(SHARES-1); i=i+1) begin
+        /*
         assign _Zmul1xDI[i] = 0;
         assign _Zmul2xDI[i] = 0;
         assign _Zmul3xDI[i] = 0;
+        */
+        assign _Zmul1xDI[i] = $random;
+        assign _Zmul2xDI[i] = $random;
+        assign _Zmul3xDI[i] = $random;
+        
     end
 
     for (genvar i = 0; i < 2*SHARES; i=i+1) begin
+        /*
         assign _Bmul1xDI[i] = 0;
         assign _Bmul2xDI[i] = 0;
         assign _Bmul3xDI[i] = 0;
+        */
+        assign _Bmul1xDI[i] = $random;
+        assign _Bmul2xDI[i] = $random;
+        assign _Bmul3xDI[i] = $random;
+        
     end
 
     inverter #(.VARIANT(VARIANT), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(EIGHT_STAGED_SBOX), .SHARES(SHARES))
@@ -66,7 +81,6 @@ module tb_inverter ();
 		RstxBI = 0;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] <= 0;
-			/* code */
 		end
 		#T;
 		RstxBI = 1;
@@ -74,24 +88,6 @@ module tb_inverter ();
 
         //alternative version
         /*
-        for (integer x = 0; x < SHARES; x = x + 1) begin
-            for (integer i = 0; i < 2; i = i+1) begin
-                XxDI[x][3] <= i;
-                for (integer j = 0; j < 2; j=j+1) begin
-                    XxDI[x][2] <= j;
-                    for (integer k = 0; k < 2; k=k+1) begin
-                        XxDI[x][1] <= k;
-                        for (integer l = 0; l < 2; l=l+1) begin
-                            XxDI[x][0] <= l;
-                        end
-                        #T;
-                    end
-                    #T;
-                end
-                #T;
-            end
-        end
-        */
         for (integer i = 0; i < SHARES; i = i + 1) begin
             XxDI[i] <= 4'b0000;
             #T;
@@ -126,7 +122,171 @@ module tb_inverter ();
             XxDI[i] <= 4'b1111;
             #T;
         end
+        */
+
+
+
+
+        /*
+        XxDI[0] = 4'b0000;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0001;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0010;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0011;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0100;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0101;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0110;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b0111;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1000;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1001;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1010;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1011;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1100;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1101;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1110;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        XxDI[0] = 4'b1111;
+        X = XxDI[0];
+        Q = QxDO[0];
+        for (integer i = 1; i < SHARES; i = i + 1) begin
+            XxDI[i] = $random;
+            X = X ^ XxDI[i];
+            Q = Q ^ QxDO[i];
+        end
+        #T;
+        */
+
         
+        for (integer k = 0; k < 100; k = k + 1) begin 
+            X = 4'b0000;
+            Q = 4'b0000;
+            for (integer i = 0; i < SHARES; i = i + 1) begin
+                XxDI[i] = $random;
+                X = X ^ XxDI[i];
+                Q = Q ^ QxDO[i];
+            end
+            #T;
+        end
+        
+
     end
 
 

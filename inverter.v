@@ -33,8 +33,10 @@ output [4*SHARES-1 : 0] _QxDO;
 wire [3:0] XxDI [SHARES-1 : 0];
 wire [3:0] QxDO [SHARES-1 : 0];
 
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 4; j=j+1) begin
+genvar i;
+genvar j;
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 4; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*4+j];
         assign _QxDO[i*4+j] = QxDO[i][j];
     end
@@ -47,14 +49,16 @@ wire [1:0] B [SHARES-1:0]; // LSBits of input
 wire [2*SHARES-1 : 0] _A;
 wire [2*SHARES-1 : 0] _B;
 // Intermediates
-wire [1:0] AmulBxD [SHARES-1:0]; // A x B
-wire [2*SHARES-1 : 0] _AmulBxD;
+// wire [1:0] AmulBxD [SHARES-1:0]; // A x B
+// wire [2*SHARES-1 : 0] _AmulBxD;
+wire [1:0] AsqscmulBxD [SHARES-1:0]; // A sqsc B + A x B = E
+wire [2*SHARES-1 : 0] _AsqscmulBxD;
 wire [1:0] AmulExD [SHARES-1:0]; // A x E
 wire [2*SHARES-1 : 0] _AmulExD;
 wire [1:0] BmulExD [SHARES-1:0]; // B x E
 wire [2*SHARES-1 : 0] _BmulExD;
-wire [1:0] ExD [SHARES-1:0]; // E
-wire [2*SHARES-1 : 0] _ExD;
+// wire [1:0] ExD [SHARES-1:0]; // E
+// wire [2*SHARES-1 : 0] _ExD;
 wire [1:0] CxD [SHARES-1:0]; // C
 // Pipelining
 reg [1:0] AxDP [SHARES-1:0]; // MSBits
@@ -63,14 +67,15 @@ reg [1:0] BxDP [SHARES-1:0]; // LSBits
 wire [2*SHARES-1 : 0] _BxDP;
 reg [1:0] CxDP [SHARES-1:0]; // C
 
-for (genvar i = 0; i < SHARES; i=i+1) begin
-    for (genvar j = 0; j < 2; j=j+1) begin
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
         assign _A[i*2+j] = A[i][j];
         assign _B[i*2+j] = B[i][j];
-        assign AmulBxD[i][j] = _AmulBxD[i*2+j];
+        // assign AmulBxD[i][j] = _AmulBxD[i*2+j];
+        assign AsqscmulBxD[i][j] = _AsqscmulBxD[i*2+j];
         assign AmulExD[i][j] = _AmulExD[i*2+j];
         assign BmulExD[i][j] = _BmulExD[i*2+j];
-        assign _ExD[i*2+j] = ExD[i][j];
+        // assign _ExD[i*2+j] = ExD[i][j];
         assign _AxDP[i*2+j] = AxDP[i][j];
         assign _BxDP[i*2+j] = BxDP[i][j];
     end
@@ -82,7 +87,7 @@ end
 // wire [1:0] ExDP [SHARES-1:0]; // E pipl.
 
 // General
-for (genvar i = 0; i < SHARES; i = i + 1) begin
+for (i = 0; i < SHARES; i = i + 1) begin
     // split GF2^4 element in two GF2^2
     assign A[i][1] = XxDI[i][3];
     assign A[i][0] = XxDI[i][2];
@@ -93,28 +98,30 @@ end
 // Masked Inverter for 5 staged Sbox
 if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+        integer k;
         if (~RstxBI) begin // asynchronous reset (active low)
             // iterate over shares
-            for (integer i = 0; i < SHARES; i = i + 1) begin
-                AxDP[i] = 2'b00;
-                BxDP[i] = 2'b00;
-                CxDP[i] = 2'b00;
+            for (k = 0; k < SHARES; k = k + 1) begin
+                AxDP[k] = 2'b00;
+                BxDP[k] = 2'b00;
+                CxDP[k] = 2'b00;
             end
         end
         else begin // rising clock edge
             // iterate over shares
-            for (integer i = 0; i < SHARES; i = i + 1) begin
-                AxDP[i] = A[i];
-                BxDP[i] = B[i];
-                CxDP[i] = CxD[i];
+            for (k = 0; k < SHARES; k = k + 1) begin
+                AxDP[k] = A[k];
+                BxDP[k] = B[k];
+                CxDP[k] = CxD[k];
             end
         end
     end
 
+    /*
     wire [1:0] d [SHARES-1 : 0];
-    wire [1:0] dm [SHARES-1 : 0];
+    // wire [1:0] dm [SHARES-1 : 0];
     // iterate over shares
-    for (genvar i = 0; i < SHARES; i = i + 1) begin
+    for (i = 0; i < SHARES; i = i + 1) begin
         // xor and ^2
         assign d[i] = {(A[i][0] ^ B[i][0]), (A[i][1] ^ B[i][1])};
         // scale
@@ -136,13 +143,32 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         ._BxDI(_Bmul1xDI),
         ._QxDO(_AmulBxD)
     );
+    */
+
+    for (i = 0; i < SHARES; i = i + 1) begin
+        // Output
+        assign QxDO[i] = {BmulExD[i], AmulExD[i]};
+    end
+
+    // Multipliers
+    shared_sqscmul_gf2 # (.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    a_sqscmul_b
+    (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_A),
+        ._YxDI(_B),
+        ._ZxDI(_Zmul1xDI),
+        ._BxDI(_Bmul1xDI),
+        ._QxDO(_AsqscmulBxD)
+    );
 
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     a_mul_e (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_AxDP),
-        ._YxDI(_ExD),
+        ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul2xDI),
         ._BxDI(_Bmul2xDI),
         ._QxDO(_AmulExD)
@@ -153,7 +179,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_BxDP),
-        ._YxDI(_ExD),
+        ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul3xDI),
         ._BxDI(_Bmul3xDI),
         ._QxDO(_BmulExD)

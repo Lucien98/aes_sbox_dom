@@ -1,7 +1,7 @@
-module shared_mul_gf4
+module shared_sqscmul_gf4
 #
 (
-  parameter PIPELINED = 1,
+    parameter PIPELINED = 1,
     parameter SHARES = 4
 )
 (
@@ -49,6 +49,9 @@ wire [3:0] Xi_mul_Yj [SHARES*SHARES-1:0];
 reg [3:0] FFxDN     [SHARES*SHARES-1:0];
 reg [3:0] FFxDP     [SHARES*SHARES-1:0];
 
+wire [3:0] Y0xorY1xD [SHARES-1 : 0];
+wire [3:0] Y0xorY12xD [SHARES-1 : 0]; 
+
 
 for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < SHARES; j=j+1) begin
@@ -60,6 +63,14 @@ for (i = 0; i < SHARES; i=i+1) begin
     end
 end
 
+for (i = 0; i < SHARES; i=i+1) begin
+    assign Y0xorY1xD[i] = XxDI[i] ^ YxDI[i];
+    square_scaler square_scaler_inst (
+        .DataInxDI(Y0xorY1xD[i]),
+        .DataOutxDO(Y0xorY12xD[i])
+    );
+end
+
 // purpose: Register process
 // type   : sequential
 // inputs : ClkxCI, RstxBI
@@ -67,7 +78,6 @@ end
 
 // async
 always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-// always @(posedge ClkxCI) begin : proc_
     integer k;
     integer l;
     if(~RstxBI) begin
@@ -107,7 +117,7 @@ if (PIPELINED == 1) begin
             result[k] = 4'b0000;
             for (l = 0; l < SHARES; l=l+1) begin
                 if (k==l) begin
-                    FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l];             // domain term
+                    FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ Y0xorY12xD[k];             // domain term
                 end
                 else if (l > k) begin
                     FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ ZxDI[k + l*(l-1)/2];  // regular term

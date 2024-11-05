@@ -11,6 +11,8 @@ module tb_aes_sbox ();
     // General signals
 	reg ClkxCI;
 	// reg RstxBI;
+    `include "blind.vh"
+    localparam blind_n_rnd = _blind_nrnd(SHARES);
 
     wire [8*SHARES-1 : 0] _XxDI;
     reg [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
@@ -19,10 +21,10 @@ module tb_aes_sbox ();
     reg [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
     reg [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
     reg [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-    reg [4*SHARES-1 : 0] _Bmul1xDI; // for y1 * y0
-    reg [2*SHARES-1 : 0] _Binv1xDI; // for inverter
-    reg [2*SHARES-1 : 0] _Binv2xDI; // ...
-    reg [2*SHARES-1 : 0] _Binv3xDI; // ...
+    // reg [4*blind_n_rnd-1 : 0] _Bmul1xDI; // for y1 * y0
+    reg [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
+    reg [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
+    reg [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
     wire [8*SHARES-1 : 0] _QxDO;
 
     reg [7:0] XxDI [SHARES-1 : 0];
@@ -73,7 +75,7 @@ module tb_aes_sbox ();
         ._Zinv1xDI(_Zinv1xDI),
         ._Zinv2xDI(_Zinv2xDI),
         ._Zinv3xDI(_Zinv3xDI),
-        ._Bmul1xDI(_Bmul1xDI),
+        // ._Bmul1xDI(_Bmul1xDI),
         ._Binv1xDI(_Binv1xDI),
         ._Binv2xDI(_Binv2xDI),
         ._Binv3xDI(_Binv3xDI),
@@ -94,7 +96,7 @@ module tb_aes_sbox ();
             _Zinv1xDI = $random;
             _Zinv2xDI = $random;
             _Zinv3xDI = $random;
-            _Bmul1xDI = $random;
+            // _Bmul1xDI = $random;
             _Binv1xDI = $random;
             _Binv2xDI = $random;
             _Binv3xDI = $random;
@@ -153,7 +155,7 @@ module tb_aes_sbox ();
                 _Zinv1xDI = $random;
                 _Zinv2xDI = $random;
                 _Zinv3xDI = $random;
-                _Bmul1xDI = $random;
+                // _Bmul1xDI = $random;
                 _Binv1xDI = $random;
                 _Binv2xDI = $random;
                 _Binv3xDI = $random;

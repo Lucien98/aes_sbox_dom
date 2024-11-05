@@ -16,13 +16,18 @@ module aes_sbox #(
     _Zinv2xDI,
     _Zinv3xDI,
     // Blinding values for Y0*Y1 and Inverter (for 5 stage Sbox only)
-    _Bmul1xDI,
+    // _Bmul1xDI,
     _Binv1xDI,
     _Binv2xDI,
     _Binv3xDI,
     // Output Q = SBOX(X)
     _QxDO
 );
+
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
+
+
 input ClkxCI;
 input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
@@ -32,10 +37,10 @@ input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
 input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-input [4*SHARES-1 : 0] _Bmul1xDI; // for y1 * y0
-input [2*SHARES-1 : 0] _Binv1xDI; // for inverter
-input [2*SHARES-1 : 0] _Binv2xDI; // ...
-input [2*SHARES-1 : 0] _Binv3xDI; // ...
+// input [4*blind_n_rnd-1 : 0] _Bmul1xDI; // for y1 * y0
+input [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
+input [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
+input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [7:0] XxDI [SHARES-1 : 0];

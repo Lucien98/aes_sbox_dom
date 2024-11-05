@@ -11,18 +11,22 @@ module real_dom_shared_mul_gf2 #(
     _BxDI,
     _QxDO
 );
+
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
+
 input ClkxCI;
 input RstxBI;
 input [2*SHARES-1 : 0] _XxDI;
 input [2*SHARES-1 : 0] _YxDI;
 input [SHARES*(SHARES-1)-1 : 0] _ZxDI;
-input [2*SHARES-1 : 0] _BxDI;
+input [2*blind_n_rnd-1 : 0] _BxDI;
 output [2*SHARES-1 : 0] _QxDO;
 
 wire [1:0] XxDI [SHARES-1 : 0];
 wire [1:0] YxDI [SHARES-1 : 0];
 wire [1:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
-wire [1:0] BxDI [SHARES-1 : 0];
+wire [1:0] BxDI [blind_n_rnd-1 : 0];
 wire [1:0] QxDO [SHARES-1 : 0];
 
 genvar i;

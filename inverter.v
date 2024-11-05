@@ -19,15 +19,19 @@ module inverter #(
     // Outputs
     _QxDO
 );
+
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
+
 input ClkxCI;
 input RstxBI;
 input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
-input [2*SHARES-1 : 0] _Bmul1xDI;
-input [2*SHARES-1 : 0] _Bmul2xDI;
-input [2*SHARES-1 : 0] _Bmul3xDI;
+input [2*blind_n_rnd-1 : 0] _Bmul1xDI;
+input [2*blind_n_rnd-1 : 0] _Bmul2xDI;
+input [2*blind_n_rnd-1 : 0] _Bmul3xDI;
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];

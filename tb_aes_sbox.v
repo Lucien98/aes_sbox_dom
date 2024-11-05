@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_aes_box ();
+module tb_aes_sbox ();
     localparam T=2.0;
 	localparam Td = T/2.0;
 
@@ -62,8 +62,8 @@ module tb_aes_box ();
     end
     */
 
-    aes_box #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
-    inst_aes_box (
+    aes_sbox #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
+    inst_aes_sbox (
         .ClkxCI(ClkxCI),
         // .RstxBI(RstxBI),
         ._XxDI(_XxDI),

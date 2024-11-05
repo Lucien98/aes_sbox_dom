@@ -1,4 +1,4 @@
-module aes_box #(
+module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
     parameter EIGHT_STAGED = 0, // 0: no

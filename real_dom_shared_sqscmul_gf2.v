@@ -1,4 +1,4 @@
-module shared_sqscmul_gf2 #(
+module real_dom_shared_sqscmul_gf2 #(
     parameter PIPELINED = 1, // 1: yes, 0: no
     parameter FIRST_ORDER_OPTIMIZATION = 1, // 1: yes, 0: no
     parameter SHARES = 2
@@ -217,7 +217,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
     end
 
     // 完成DOM-indep和square scaler
-    shared_mul_gf2_new #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
+    shared_XmulBxorsqsc_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_XxDI),

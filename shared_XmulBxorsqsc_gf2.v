@@ -3,7 +3,7 @@
 // X*B中的随机数为Z
 // 未作inverse操作
 
-module shared_mul_gf2_new
+module shared_XmulBxorsqsc_gf2
 #
 (
     parameter PIPELINED = 1,

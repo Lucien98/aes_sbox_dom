@@ -1,24 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2024/8/29 14:13:44
-// Design Name: 
-// Module Name: tb_shared_mul_gf4prime / Behavioral
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 / File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 `timescale 1ns/1ps
 module tb_shared_XmulBxorsqsc_gf2();
 
@@ -34,8 +13,6 @@ reg RstxBI;
 
 reg [1:0] XxDI [SHARES-1 : 0];
 reg [1:0] BxDI [SHARES-1 : 0];
-// reg [1:0] YxDI [SHARES-1 : 0];
-// reg [1:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
 wire [1:0] QxDO [SHARES-1 : 0];
 
 wire [2*SHARES-1 : 0] _XxDI;
@@ -95,8 +72,6 @@ initial begin
                 for (integer b = 0; b < 2**N; b = b + 1) begin
                     XxDI[0] <= a;
                     BxDI[0] <= b;
-//                    _ZxDI = $random;
-//                    _BxDI = $random;
                     X = 2'b00;
                     B = 2'b00;
                     Q = 2'b00;

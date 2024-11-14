@@ -40,30 +40,6 @@ module tb_aes_sbox ();
         end
     end
 
-    /*
-    for (genvar i = 0; i < 2*SHARES*(SHARES-1); i=i+1) begin
-        assign _Zmul1xDI[i] = $random;
-        assign _Zmul2xDI[i] = $random;
-        assign _Zmul3xDI[i] = $random;
-    end
-
-    for (genvar i = 0; i < SHARES*(SHARES-1); i=i+1) begin
-        assign _Zinv1xDI[i] = $random;
-        assign _Zinv2xDI[i] = $random;
-        assign _Zinv3xDI[i] = $random;
-    end
-
-    for (genvar i = 0; i < 4*SHARES; i=i+1) begin
-        assign _Bmul1xDI[i] = $random;
-    end
-
-    for (genvar i = 0; i < 2*SHARES; i=i+1) begin
-        assign _Binv1xDI[i] = $random;
-        assign _Binv2xDI[i] = $random;
-        assign _Binv3xDI[i] = $random;
-    end
-    */
-
     aes_sbox #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
     inst_aes_sbox (
         .ClkxCI(ClkxCI),
@@ -75,7 +51,6 @@ module tb_aes_sbox ();
         ._Zinv1xDI(_Zinv1xDI),
         ._Zinv2xDI(_Zinv2xDI),
         ._Zinv3xDI(_Zinv3xDI),
-        // ._Bmul1xDI(_Bmul1xDI),
         ._Binv1xDI(_Binv1xDI),
         ._Binv2xDI(_Binv2xDI),
         ._Binv3xDI(_Binv3xDI),
@@ -102,46 +77,6 @@ module tb_aes_sbox ();
             _Binv3xDI = $random;
 		end
 		#T;
-		// RstxBI = 1;
-		// #T;
-
-
-        /*
-        for (integer i = 0; i < SHARES; i = i + 1) begin
-            XxDI[i] <= 8'b00000000;
-            #T;
-            XxDI[i] <= 8'b00000001;
-            #T;
-            XxDI[i] <= 8'b00000010;
-            #T;
-            XxDI[i] <= 8'b00000011;
-            #T;
-            XxDI[i] <= 8'b00000100;
-            #T;
-            XxDI[i] <= 8'b00000101;
-            #T;
-            XxDI[i] <= 8'b00000110;
-            #T;
-            XxDI[i] <= 8'b00000111;
-            #T;
-            XxDI[i] <= 8'b00001000;
-            #T;
-            XxDI[i] <= 8'b00001001;
-            #T;
-            XxDI[i] <= 8'b00001010;
-            #T;
-            XxDI[i] <= 8'b00001011;
-            #T;
-            XxDI[i] <= 8'b00001100;
-            #T;
-            XxDI[i] <= 8'b00001101;
-            #T;
-            XxDI[i] <= 8'b00001110;
-            #T;
-            XxDI[i] <= 8'b00001111;
-            #T;
-        end
-        */
         
         for (integer i = 0; i < 256; i = i + 1) begin
             XxDI[1] = i;
@@ -155,7 +90,6 @@ module tb_aes_sbox ();
                 _Zinv1xDI = $random;
                 _Zinv2xDI = $random;
                 _Zinv3xDI = $random;
-                // _Bmul1xDI = $random;
                 _Binv1xDI = $random;
                 _Binv2xDI = $random;
                 _Binv3xDI = $random;

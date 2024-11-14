@@ -14,8 +14,6 @@ module tb_real_dom_shared_mul_gf2 ();
 
 	reg [1:0] XxDI [SHARES-1 : 0];
 	reg [1:0] YxDI [SHARES-1 : 0];
-	// reg [1:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
-    // reg [1:0] BxDI [SHARES-1 : 0];
 	wire [1:0] QxDO [SHARES-1 : 0];
 
 	wire [2*SHARES-1 : 0] _XxDI;
@@ -59,7 +57,6 @@ module tb_real_dom_shared_mul_gf2 ();
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] <= 0;
 			YxDI[k] <= 0;
-			/* code */
 		end
 		#T;
 		RstxBI = 1;

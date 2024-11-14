@@ -16,7 +16,6 @@ module aes_sbox #(
     _Zinv2xDI,
     _Zinv3xDI,
     // Blinding values for Y0*Y1 and Inverter (for 5 stage Sbox only)
-    // _Bmul1xDI,
     _Binv1xDI,
     _Binv2xDI,
     _Binv3xDI,
@@ -37,7 +36,6 @@ input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
 input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-// input [4*blind_n_rnd-1 : 0] _Bmul1xDI; // for y1 * y0
 input [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
 input [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
 input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
@@ -62,9 +60,6 @@ wire [4*SHARES-1 : 0] _Y1xD;
 wire [3:0] Y0xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0xD;
 wire [3:0] Y0xorY1xD [SHARES-1:0];
-// wire [3:0] Y0xorY12xD [SHARES-1:0];
-// wire [3:0] Y0mulY1xD [SHARES-1:0];
-// wire [4*SHARES-1 : 0] _Y0mulY1xD;
 wire [3:0] Y0sqscmulY1xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0sqscmulY1xD;
 wire [3:0] InverterInxD [SHARES-1:0];
@@ -90,7 +85,6 @@ reg [3:0] Y1_2xDP [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y1_2xDP;
 reg [3:0] Y1_3xDP [SHARES-1:0];
 reg [3:0] Y1_4xDP [SHARES-1:0];
-// reg [3:0] Y0xorY12xDP [SHARES-1:0];
 reg [7:0] mappedxDP [SHARES-1:0];
 wire [3:0] InverterInxDP [SHARES-1:0];
 
@@ -100,7 +94,6 @@ for (i = 0; i < SHARES; i=i+1) begin
         // Used in real_dom_shared_mul_gf4
         assign _Y1xD[i*4+j] = Y1xD[i][j];
         assign _Y0xD[i*4+j] = Y0xD[i][j];
-        // assign Y0mulY1xD[i][j] = _Y0mulY1xD[i*4+j];
         assign Y0sqscmulY1xD[i][j] = _Y0sqscmulY1xD[i*4+j];
 
         // Used in inverter
@@ -194,17 +187,6 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataOutxDO(mappedxD[i])
         );
 
-        /*
-        // Input is split up in Y1 and Y0
-        assign Y0xorY1xD[i] = Y1xD[i] ^ Y0xD[i];
-
-        // Square sclaer
-        square_scaler
-        square_scaler_gf24 (
-            .DataInxDI(Y0xorY1xD[i]),
-            .DataOutxDO(Y0xorY12xD[i])
-        );
-        */
 
         // Inverter input
         // assign InverterInxD[i] = Y0mulY1xD[i] ^ Y0xorY12xDP[i];
@@ -232,19 +214,6 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     end
 
     // Single instances:
-    /*
-    // Multiply Y1 and Y0 (GF 2^4)
-    real_dom_shared_mul_gf4 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    inst_real_dom_shared_mul_gf4 (
-        .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
-        ._XxDI(_Y1xD),
-        ._YxDI(_Y0xD),
-        ._ZxDI(_Zmul1xDI),
-        ._BxDI(_Bmul1xDI),
-        ._QxDO(_Y0mulY1xD)
-    );
-    */
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
     shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (

@@ -53,16 +53,12 @@ wire [1:0] B [SHARES-1:0]; // LSBits of input
 wire [2*SHARES-1 : 0] _A;
 wire [2*SHARES-1 : 0] _B;
 // Intermediates
-// wire [1:0] AmulBxD [SHARES-1:0]; // A x B
-// wire [2*SHARES-1 : 0] _AmulBxD;
 wire [1:0] AsqscmulBxD [SHARES-1:0]; // A sqsc B + A x B = E
 wire [2*SHARES-1 : 0] _AsqscmulBxD;
 wire [1:0] AmulExD [SHARES-1:0]; // A x E
 wire [2*SHARES-1 : 0] _AmulExD;
 wire [1:0] BmulExD [SHARES-1:0]; // B x E
 wire [2*SHARES-1 : 0] _BmulExD;
-// wire [1:0] ExD [SHARES-1:0]; // E
-// wire [2*SHARES-1 : 0] _ExD;
 wire [1:0] CxD [SHARES-1:0]; // C
 // Pipelining
 reg [1:0] AxDP [SHARES-1:0]; // MSBits
@@ -85,10 +81,6 @@ for (i = 0; i < SHARES; i=i+1) begin
     end
 end
 
-// For 8 staged Sbox only
-// wire [1:0] pipelinedAxDP [SHARES-1:0]; // MSBits
-// wire [1:0] pipelinedBxDP [SHARES-1:0]; // LSBits
-// wire [1:0] ExDP [SHARES-1:0]; // E pipl.
 
 // General
 for (i = 0; i < SHARES; i = i + 1) begin
@@ -120,34 +112,6 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
             end
         end
     end
-
-    /*
-    wire [1:0] d [SHARES-1 : 0];
-    // wire [1:0] dm [SHARES-1 : 0];
-    // iterate over shares
-    for (i = 0; i < SHARES; i = i + 1) begin
-        // xor and ^2
-        assign d[i] = {(A[i][0] ^ B[i][0]), (A[i][1] ^ B[i][1])};
-        // scale
-        assign CxD[i] = {d[i][0], (d[i][1] ^ d[i][0])};
-        // (c+d)^2
-        assign ExD[i] = {(CxDP[i][0] ^ AmulBxD[i][0]), (CxDP[i][1] ^ AmulBxD[i][1])};
-        // Output
-        assign QxDO[i] = {BmulExD[i], AmulExD[i]};
-    end
-
-    // Multipliers
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    a_mul_b (
-        .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
-        ._XxDI(_A),
-        ._YxDI(_B),
-        ._ZxDI(_Zmul1xDI),
-        ._BxDI(_Bmul1xDI),
-        ._QxDO(_AmulBxD)
-    );
-    */
 
     for (i = 0; i < SHARES; i = i + 1) begin
         // Output

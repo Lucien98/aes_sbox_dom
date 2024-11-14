@@ -85,14 +85,7 @@ end
 
 // First_order optimized variant
 if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
-    /*
-    // Blinding of Y
-    // process blind_y_p
-    assign BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
-    assign BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
-    */
 
-    //always @(BxDI or X_times_BxD or XxDI or XxDP or YxDI or YxDP or ZxDI or XtimesYxS or XtimesBlindedY or X_times_B_remaskedxDP) begin
     always @(*) begin
         BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
         BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
@@ -128,7 +121,6 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     // Remask multiplication results from different domains
     // process x_times_b_register_p
     always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-    // always @(posedge ClkxCI) begin : proc_
         if (~RstxBI) begin // asynchronous reset (active low)
             X_times_B_remaskedxDP[0] <= 2'b00;
             X_times_B_remaskedxDP[1] <= 2'b00;
@@ -167,7 +159,6 @@ end
 if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
     reg [1:0] SumBlindedY;
     integer k;
-    //always @(BlindedYxDP or BxDI or XxDI or XxDP or YxDI) begin
     always @(*) begin
         for (k = 0; k < SHARES; k = k + 1) begin
             BlindedYxDN[k] = BlindedYxDP[k];
@@ -237,7 +228,6 @@ end
 
 // Blinding register process
 always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-// always @(posedge ClkxCI) begin : proc_
     integer k;
     if (~RstxBI) begin // asynchronous reset (active low)
         for (k = 0; k < SHARES; k = k + 1) begin

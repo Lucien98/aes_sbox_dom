@@ -67,7 +67,6 @@ end
 
 // async
 always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-// always @(posedge ClkxCI) begin : proc_
     integer k;
     integer l;
     if(~RstxBI) begin
@@ -101,7 +100,6 @@ if (PIPELINED == 1) begin
 // outputs: 
     integer k;
     integer l;
-    //always @(FFxDP or FFxDN or Xi_mul_Yj or ZxDI) begin
     always @(*) begin
         for (k = 0; k < SHARES; k=k+1) begin
             result[k] = 4'b0000;

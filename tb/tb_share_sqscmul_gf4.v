@@ -1,24 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2024/8/29 14:13:44
-// Design Name: 
-// Module Name: tb_shared_mul_gf4prime / Behavioral
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 / File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 `timescale 1ns/1ps
 module tb_shared_sqscmul_gf4();
 
@@ -34,7 +13,6 @@ reg RstxBI;
 
 reg [3:0] XxDI [SHARES-1 : 0];
 reg [3:0] YxDI [SHARES-1 : 0];
-// reg [3:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
 wire [3:0] QxDO [SHARES-1 : 0];
 
 wire [4*SHARES-1 : 0] _XxDI;

@@ -15,7 +15,7 @@ module aes_sbox #(
     _Zinv1xDI,
     _Zinv2xDI,
     _Zinv3xDI,
-    // Blinding values for Y0*Y1 and Inverter (for 5 stage Sbox only)
+    // Blinding values for Inverter (for 5 stage Sbox only)
     _Binv1xDI,
     _Binv2xDI,
     _Binv3xDI,

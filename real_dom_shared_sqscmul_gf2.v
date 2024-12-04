@@ -35,9 +35,24 @@ for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 2; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*2+j];
         assign YxDI[i][j] = _YxDI[i*2+j];
-        assign BxDI[i][j] = _BxDI[i*2+j];
+        // assign BxDI[i][j] = _BxDI[i*2+j];
         assign _QxDO[i*2+j] = QxDO[i][1-j]; // 1-j: inverse
     end
+end
+
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    for (i = 0; i < SHARES-1; i=i+1) begin
+        for (j = 0; j < 2; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*2+j];
+        end
+    end
+end
+else begin
+    for (i = 0; i < SHARES; i=i+1) begin
+        for (j = 0; j < 2; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*2+j];
+        end
+    end    
 end
 
 for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin

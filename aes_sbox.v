@@ -61,15 +61,27 @@ wire [3:0] Y0xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0xD;
 wire [3:0] Y0xorY1xD [SHARES-1:0];
 wire [3:0] Y0sqscmulY1xD [SHARES-1:0];
+wire [3:0] Y0sqscmulY1;
+assign Y0sqscmulY1 = Y0sqscmulY1xD[0] ^ Y0sqscmulY1xD[1];
 wire [4*SHARES-1 : 0] _Y0sqscmulY1xD;
 wire [3:0] InverterInxD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _InverterInxD;
-wire [3:0] InverterOutxD [SHARES-1:0];
-wire [4*SHARES-1 : 0] _InverterOutxD;
+wire [1:0] InverterOutxD [SHARES-1:0];
+wire [2*SHARES-1 : 0] _InverterOutxD;
 wire [3:0] InverseMSBxD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _InverseMSBxD;
+wire [8*SHARES-1 : 0] _GF256InvxD;
+wire [8*SHARES-1 : 0] _GF256InvxD_shbyte;
 wire [3:0] InverseLSBxD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _InverseLSBxD;
+wire [2*SHARES-1 : 0] _LSBLSB;
+wire [2*SHARES-1 : 0] _LSBMSB;
+wire [2*SHARES-1 : 0] _MSBLSB;
+wire [2*SHARES-1 : 0] _MSBMSB;
+wire [2*SHARES-1 : 0] _InvOutLSBLSB;
+wire [2*SHARES-1 : 0] _InvOutLSBMSB;
+wire [2*SHARES-1 : 0] _InvOutMSBLSB;
+wire [2*SHARES-1 : 0] _InvOutMSBMSB;
 wire [7:0] InvUnmappedxD [SHARES-1:0];
 wire [7:0] InvMappedxD [SHARES-1:0];
 // Pipelining registers
@@ -88,7 +100,17 @@ reg [3:0] Y1_4xDP [SHARES-1:0];
 reg [7:0] mappedxDP [SHARES-1:0];
 wire [3:0] InverterInxDP [SHARES-1:0];
 
+wire[1:0] MSBMSB;
 
+wire[1:0] MSBLSB;
+
+wire[1:0] LSBMSB;
+
+wire[1:0] LSBLSB;
+
+wire[3:0] Y0;
+
+assign Y0 = Y0_1xDP[0] ^ Y0_1xDP[1];
 for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
         // Used in real_dom_shared_mul_gf4
@@ -96,15 +118,33 @@ for (i = 0; i < SHARES; i=i+1) begin
         assign _Y0xD[i*4+j] = Y0xD[i][j];
         assign Y0sqscmulY1xD[i][j] = _Y0sqscmulY1xD[i*4+j];
 
+        // Used in shared_mul_gf4
+        assign _Y0_2xDP[i*4+j] = Y0_0xDP[i][j];
+        assign _Y1_2xDP[i*4+j] = Y1_0xDP[i][j];
         // Used in inverter
         assign _InverterInxD[i*4+j] = InverterInxD[i][j];
-        assign InverterOutxD[i][j] = _InverterOutxD[i*4+j];
 
-        // Used in shared_mul_gf4
-        assign _Y0_2xDP[i*4+j] = Y0_2xDP[i][j];
-        assign _Y1_2xDP[i*4+j] = Y1_2xDP[i][j];
         assign InverseMSBxD[i][j] = _InverseMSBxD[i*4+j];
         assign InverseLSBxD[i][j] = _InverseLSBxD[i*4+j];
+    end
+end
+
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
+        assign InverterOutxD[i][j] = _InverterOutxD[i*2+j];
+        assign _LSBLSB[i*2+j] = _InverseLSBxD[i*4+j];
+        assign _LSBMSB[i*2+j] = _InverseLSBxD[i*4+j+2];
+
+        assign _MSBLSB[i*2+j] = _InverseMSBxD[i*4+j];
+        assign _MSBMSB[i*2+j] = _InverseMSBxD[i*4+j+2];
+    end
+    assign _GF256InvxD_shbyte[i*8+:8] = {_InvOutMSBMSB[i*SHARES+:2], _InvOutMSBLSB[i*SHARES+:2], _InvOutLSBMSB[i*SHARES+:2], _InvOutLSBLSB[i*SHARES+:2]};
+end
+
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 8; j=j+1) begin
+        // Used in inverter
+        assign InvUnmappedxD[i][j] = _GF256InvxD_shbyte[i*8+j];
     end
 end
 
@@ -167,7 +207,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 
-                Y0_2xDP[k] = Y0_1xDP[k];
+                // Y0_2xDP[k] = Y0_1xDP[k];
                 Y0_1xDP[k] = Y0_0xDP[k];
                 Y0_0xDP[k] = Y0xD[k];
                 Y1_2xDP[k] = Y1_1xDP[k];
@@ -193,7 +233,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         assign InverterInxD[i] = Y0sqscmulY1xD[i];
 
         // Inverse linear mapping
-        assign InvUnmappedxD[i] = {InverseMSBxD[i], InverseLSBxD[i]};
+        // assign InvUnmappedxD[i] = {InverseMSBxD[i], InverseLSBxD[i]};
 
         // Linear mapping at output
         lin_map #(.MATRIX_SEL(0))
@@ -209,7 +249,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             assign QxDO[i] = InvMappedxD[i];
         end
         else begin // Add "b" only once
-            assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
+            assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
+            // assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
         end
     end
 
@@ -230,7 +271,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     inverter_gf24 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_InverterInxD),
+        ._XxDI(_Y0sqscmulY1xD /*_InverterInxD*/),
         ._Zmul1xDI(_Zinv1xDI),
         ._Zmul2xDI(_Zinv2xDI),
         ._Zmul3xDI(_Zinv3xDI),
@@ -245,22 +286,77 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     mult_msb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
-		._XxDI(_InverterOutxD), 
+		._XxDI(_Y0sqscmulY1xD), 
 		._YxDI(_Y0_2xDP), 
 		._ZxDI(_Zmul2xDI), 
 		._QxDO(_InverseMSBxD)
     );
+
+    assign MSBMSB = _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
+
+    assign MSBLSB = _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
 
     // Multiply Y1 and Inv (GF2^4)
     shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_lsb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
-		._XxDI(_InverterOutxD), 
+		._XxDI(_Y0sqscmulY1xD), 
 		._YxDI(_Y1_2xDP), 
 		._ZxDI(_Zmul3xDI), 
 		._QxDO(_InverseLSBxD)
     );
+
+    assign LSBMSB = _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
+
+    assign LSBLSB = _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
+
+    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_0 (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_InverterOutxD),
+        ._YxDI(_LSBLSB/*_InverseLSBxD[0*SHARES +: 2*SHARES]*/),
+        ._ZxDI(0),
+        ._BxDI(0),
+        ._QxDO(_InvOutLSBLSB)
+    );
+
+    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_1 (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_InverterOutxD),
+        ._YxDI(_LSBMSB/*_InverseLSBxD[2*SHARES +: 2*SHARES]*/),
+        ._ZxDI(0),
+        ._BxDI(0),
+        ._QxDO(_InvOutLSBMSB)
+    );
+
+    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_2 (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_InverterOutxD),
+        ._YxDI(_MSBLSB/*_InverseMSBxD[0*SHARES +: 2*SHARES]*/),
+        ._ZxDI(0),
+        ._BxDI(0),
+        ._QxDO(_InvOutMSBLSB)
+    );
+
+    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_3 (
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._XxDI(_InverterOutxD),
+        ._YxDI(_MSBMSB/*_InverseMSBxD[2*SHARES +: 2*SHARES]*/),
+        ._ZxDI(0),
+        ._BxDI(0),
+        ._QxDO(_InvOutMSBMSB)
+    );
+
+
+
 end
 
 

@@ -10,7 +10,7 @@ module tb_aes_sbox ();
 
     // General signals
 	reg ClkxCI;
-	// reg RstxBI;
+	reg RstxBI;
     `include "blind.vh"
     localparam blind_n_rnd = _blind_nrnd(SHARES);
 
@@ -43,7 +43,7 @@ module tb_aes_sbox ();
     aes_sbox #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
     inst_aes_sbox (
         .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
+        .RstxBI(RstxBI),
         ._XxDI(_XxDI),
         ._Zmul1xDI(_Zmul1xDI),
         ._Zmul2xDI(_Zmul2xDI),
@@ -62,7 +62,9 @@ module tb_aes_sbox ();
 
 	initial begin
         ClkxCI = 0;
-		// RstxBI = 0;
+		RstxBI = 0;
+        #T;
+        RstxBI = 1;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] = 0;
             _Zmul1xDI = $random;

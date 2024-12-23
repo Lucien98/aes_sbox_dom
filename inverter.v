@@ -32,20 +32,27 @@ input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul1xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul2xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul3xDI;
-output [4*SHARES-1 : 0] _QxDO;
+output [2*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];
-wire [3:0] QxDO [SHARES-1 : 0];
-
+wire [1:0] QxDO [SHARES-1 : 0];
+wire [3:0] X;
+wire [1:0] Q;
+assign X=XxDI[1] ^ XxDI[0];
+assign Q=QxDO[1] ^ QxDO[0];
 genvar i;
 genvar j;
 for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*4+j];
-        assign _QxDO[i*4+j] = QxDO[i][j];
     end
 end
 
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
+        assign _QxDO[i*2+j] = QxDO[i][j];
+    end
+end
 
 // Shares
 wire [1:0] A [SHARES-1:0]; // MSBits of input
@@ -115,7 +122,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
 
     for (i = 0; i < SHARES; i = i + 1) begin
         // Output
-        assign QxDO[i] = {BmulExD[i], AmulExD[i]};
+        assign QxDO[i] = {AsqscmulBxD[i][1], AsqscmulBxD[i][0]};
     end
 
     // Multipliers

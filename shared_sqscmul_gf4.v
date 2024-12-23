@@ -32,7 +32,7 @@ for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*4+j];
         assign YxDI[i][j] = _YxDI[i*4+j];
-        assign _QxDO[i*4+j] = QxDO[i][j];
+        assign _QxDO[i*4+j] = QxDO[i][(j+2)%4];
     end
 end
 

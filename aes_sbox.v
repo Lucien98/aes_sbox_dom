@@ -242,7 +242,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     );
 
     // Inverter in GF2^4
-    inverter #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))
+    real_dom_sqscmul_gf2_wraper #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))
     inverter_gf24 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
@@ -291,7 +291,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
-        ._YxDI(_LSBLSB/*_InverseLSBxD[0*SHARES +: 2*SHARES]*/),
+        ._YxDI(_LSBLSB),
         ._ZxDI(0),
         ._BxDI(0),
         ._QxDO(_InvOutLSBLSB)
@@ -302,7 +302,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
-        ._YxDI(_LSBMSB/*_InverseLSBxD[2*SHARES +: 2*SHARES]*/),
+        ._YxDI(_LSBMSB),
         ._ZxDI(0),
         ._BxDI(0),
         ._QxDO(_InvOutLSBMSB)
@@ -313,7 +313,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
-        ._YxDI(_MSBLSB/*_InverseMSBxD[0*SHARES +: 2*SHARES]*/),
+        ._YxDI(_MSBLSB),
         ._ZxDI(0),
         ._BxDI(0),
         ._QxDO(_InvOutMSBLSB)
@@ -324,7 +324,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
-        ._YxDI(_MSBMSB/*_InverseMSBxD[2*SHARES +: 2*SHARES]*/),
+        ._YxDI(_MSBMSB),
         ._ZxDI(0),
         ._BxDI(0),
         ._QxDO(_InvOutMSBMSB)

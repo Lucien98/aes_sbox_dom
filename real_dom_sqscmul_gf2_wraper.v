@@ -1,4 +1,4 @@
-module inverter #(
+module real_dom_sqscmul_gf2_wraper #(
     parameter VARIANT = 1, // 1: Masked
     parameter PIPELINED = 1, // 1: yes
     // Only for pipelined variant

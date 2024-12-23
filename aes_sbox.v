@@ -86,17 +86,9 @@ wire [7:0] InvUnmappedxD [SHARES-1:0];
 wire [7:0] InvMappedxD [SHARES-1:0];
 // Pipelining registers
 reg [3:0] Y0_0xDP [SHARES-1:0];
-reg [3:0] Y0_1xDP [SHARES-1:0];
-reg [3:0] Y0_2xDP [SHARES-1:0];
-wire [4*SHARES-1 : 0] _Y0_2xDP;
-reg [3:0] Y0_3xDP [SHARES-1:0];
-reg [3:0] Y0_4xDP [SHARES-1:0];
+wire [4*SHARES-1 : 0] _Y0_0xDP;
 reg [3:0] Y1_0xDP [SHARES-1:0];
-reg [3:0] Y1_1xDP [SHARES-1:0];
-reg [3:0] Y1_2xDP [SHARES-1:0];
-wire [4*SHARES-1 : 0] _Y1_2xDP;
-reg [3:0] Y1_3xDP [SHARES-1:0];
-reg [3:0] Y1_4xDP [SHARES-1:0];
+wire [4*SHARES-1 : 0] _Y1_0xDP;
 reg [7:0] mappedxDP [SHARES-1:0];
 wire [3:0] InverterInxDP [SHARES-1:0];
 
@@ -108,9 +100,6 @@ wire[1:0] LSBMSB;
 
 wire[1:0] LSBLSB;
 
-wire[3:0] Y0;
-
-assign Y0 = Y0_1xDP[0] ^ Y0_1xDP[1];
 for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
         // Used in real_dom_shared_mul_gf4
@@ -119,8 +108,8 @@ for (i = 0; i < SHARES; i=i+1) begin
         assign Y0sqscmulY1xD[i][j] = _Y0sqscmulY1xD[i*4+j];
 
         // Used in shared_mul_gf4
-        assign _Y0_2xDP[i*4+j] = Y0_0xDP[i][j];
-        assign _Y1_2xDP[i*4+j] = Y1_0xDP[i][j];
+        assign _Y0_0xDP[i*4+j] = Y0_0xDP[i][j];
+        assign _Y1_0xDP[i*4+j] = Y1_0xDP[i][j];
         // Used in inverter
         assign _InverterInxD[i*4+j] = InverterInxD[i][j];
 
@@ -197,23 +186,14 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             // per share
             for (k = 0; k < SHARES; k = k + 1) begin
                 Y0_0xDP[k] = 4'b0000;
-                Y0_1xDP[k] = 4'b0000;
-                Y0_2xDP[k] = 4'b0000;
                 Y1_0xDP[k] = 4'b0000;
-                Y1_1xDP[k] = 4'b0000;
-                Y1_2xDP[k] = 4'b0000;
             end
         end
         else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 
-                // Y0_2xDP[k] = Y0_1xDP[k];
-                Y0_1xDP[k] = Y0_0xDP[k];
                 Y0_0xDP[k] = Y0xD[k];
-                Y1_2xDP[k] = Y1_1xDP[k];
-                Y1_1xDP[k] = Y1_0xDP[k];
                 Y1_0xDP[k] = Y1xD[k];
-                // Y0xorY12xDP[k] = Y0xorY12xD[k];
             end
         end
     end
@@ -227,13 +207,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataOutxDO(mappedxD[i])
         );
 
-
         // Inverter input
-        // assign InverterInxD[i] = Y0mulY1xD[i] ^ Y0xorY12xDP[i];
         assign InverterInxD[i] = Y0sqscmulY1xD[i];
-
-        // Inverse linear mapping
-        // assign InvUnmappedxD[i] = {InverseMSBxD[i], InverseLSBxD[i]};
 
         // Linear mapping at output
         lin_map #(.MATRIX_SEL(0))
@@ -287,7 +262,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
 		._XxDI(_Y0sqscmulY1xD), 
-		._YxDI(_Y0_2xDP), 
+		._YxDI(_Y0_0xDP), 
 		._ZxDI(_Zmul2xDI), 
 		._QxDO(_InverseMSBxD)
     );
@@ -302,7 +277,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
 		._XxDI(_Y0sqscmulY1xD), 
-		._YxDI(_Y1_2xDP), 
+		._YxDI(_Y1_0xDP), 
 		._ZxDI(_Zmul3xDI), 
 		._QxDO(_InverseLSBxD)
     );

@@ -17,16 +17,6 @@ module tb_aes_sbox ();
     reg [2*9*blind_n_rnd-1:0] RandomB;
 
     wire [8*SHARES-1 : 0] _XxDI;
-    // reg [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
-    // reg [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
-    // reg [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
-    // reg [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
-    // reg [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
-    // reg [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-    // // reg [4*blind_n_rnd-1 : 0] _Bmul1xDI; // for y1 * y0
-    // reg [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
-    // reg [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
-    // reg [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
     wire [8*SHARES-1 : 0] _QxDO;
 
     reg [7:0] XxDI [SHARES-1 : 0];
@@ -49,15 +39,6 @@ module tb_aes_sbox ();
         ._XxDI(_XxDI),
         .RandomZ(RandomZ),
         .RandomB(RandomB),
-        // ._Zmul1xDI(_Zmul1xDI),
-        // ._Zmul2xDI(_Zmul2xDI),
-        // ._Zmul3xDI(_Zmul3xDI),
-        // ._Zinv1xDI(_Zinv1xDI),
-        // ._Zinv2xDI(_Zinv2xDI),
-        // ._Zinv3xDI(_Zinv3xDI),
-        // ._Binv1xDI(_Binv1xDI),
-        // ._Binv2xDI(_Binv2xDI),
-        // ._Binv3xDI(_Binv3xDI),
         ._QxDO(_QxDO)
     );
 
@@ -71,16 +52,6 @@ module tb_aes_sbox ();
         RstxBI = 1;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] = 0;
-            // _Zmul1xDI = $random;
-            // _Zmul2xDI = $random;
-            // _Zmul3xDI = $random;
-            // _Zinv1xDI = $random;
-            // _Zinv2xDI = $random;
-            // _Zinv3xDI = $random;
-            // // _Bmul1xDI = $random;
-            // _Binv1xDI = $random;
-            // _Binv2xDI = $random;
-            // _Binv3xDI = $random;
             RandomB = $random;
             RandomZ = $random;
 		end
@@ -94,15 +65,6 @@ module tb_aes_sbox ();
                 Q = 4'b0000;
                 RandomB = $random;
                 RandomZ = $random;
-                // _Zmul1xDI = $random;
-                // _Zmul2xDI = $random;
-                // _Zmul3xDI = $random;
-                // _Zinv1xDI = $random;
-                // _Zinv2xDI = $random;
-                // _Zinv3xDI = $random;
-                // _Binv1xDI = $random;
-                // _Binv2xDI = $random;
-                // _Binv3xDI = $random;
                 for (integer k = 0; k < SHARES; k = k + 1) begin
                     X = X ^ XxDI[k];
                     Q = Q ^ QxDO[k];

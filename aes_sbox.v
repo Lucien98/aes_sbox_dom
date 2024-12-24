@@ -11,16 +11,6 @@ module aes_sbox #(
     // Fresh masks
     RandomZ,
     RandomB,
-    // _Zmul1xDI,
-    // _Zmul2xDI,
-    // _Zmul3xDI,
-    // _Zgf2_1xDI,
-    // _Zgf2_2xDI,
-    // _Zgf2_3xDI,
-    // Blinding values for Inverter (for 5 stage Sbox only)
-    // _Binv1xDI,
-    // _Binv2xDI,
-    // _Binv3xDI,
     // Output Q = SBOX(X)
     _QxDO
 );

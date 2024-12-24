@@ -246,13 +246,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     inverter_gf24 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_Y0sqscmulY1xD /*_InverterInxD*/),
+        ._XxDI(_Y0sqscmulY1xD ),
         ._Zmul1xDI(_Zinv1xDI),
-        ._Zmul2xDI(_Zinv2xDI),
-        ._Zmul3xDI(_Zinv3xDI),
         ._Bmul1xDI(_Binv1xDI),
-        ._Bmul2xDI(_Binv2xDI),
-        ._Bmul3xDI(_Binv3xDI),
         ._QxDO(_InverterOutxD)
     );
 

@@ -9,37 +9,67 @@ module aes_sbox #(
     // Inputs: X and random data
     _XxDI,
     // Fresh masks
-    _Zmul1xDI,
-    _Zmul2xDI,
-    _Zmul3xDI,
-    _Zinv1xDI,
-    _Zinv2xDI,
-    _Zinv3xDI,
+    RandomZ,
+    RandomB,
+    // _Zmul1xDI,
+    // _Zmul2xDI,
+    // _Zmul3xDI,
+    // _Zgf2_1xDI,
+    // _Zgf2_2xDI,
+    // _Zgf2_3xDI,
     // Blinding values for Inverter (for 5 stage Sbox only)
-    _Binv1xDI,
-    _Binv2xDI,
-    _Binv3xDI,
+    // _Binv1xDI,
+    // _Binv2xDI,
+    // _Binv3xDI,
     // Output Q = SBOX(X)
     _QxDO
 );
 
 `include "blind.vh"
 localparam blind_n_rnd = _blind_nrnd(SHARES);
-
+localparam n_random_z = SHARES*(SHARES-1);
 
 input ClkxCI;
 input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
-input [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
-input [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
-input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
-input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
-input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
-input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-input [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
-input [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
-input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
+
+input [11*SHARES*(SHARES-1)-1 : 0] RandomZ;
+input [2*9*blind_n_rnd-1:0] RandomB;
 output [8*SHARES-1 : 0] _QxDO;
+
+wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
+wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
+wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
+wire [4*blind_n_rnd-1 : 0] _Bgf4_1xDI; // for mul_gf4 in the second stage
+wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI; // ...
+
+wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_1xDI; // for mul_gf2
+wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_2xDI;
+wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_3xDI;
+wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_4xDI;
+wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_5xDI;
+wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI; // for mul_gf2
+wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI; // ...
+wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI; // ...
+wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
+wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
+
+assign _Zmul1xDI = RandomZ[0*n_random_z+:2*n_random_z];
+assign _Zmul2xDI = RandomZ[2*n_random_z+:2*n_random_z];
+assign _Zmul3xDI = RandomZ[4*n_random_z+:2*n_random_z];
+assign _Zgf2_1xDI = RandomZ[6*n_random_z+:n_random_z];
+assign _Zgf2_2xDI = RandomZ[7*n_random_z+:n_random_z];
+assign _Zgf2_3xDI = RandomZ[8*n_random_z+:n_random_z];
+assign _Zgf2_4xDI = RandomZ[9*n_random_z+:n_random_z];
+assign _Zgf2_5xDI = RandomZ[10*n_random_z+:n_random_z];
+
+assign _Bgf4_1xDI = RandomB[0*blind_n_rnd +: 4*blind_n_rnd];
+assign _Bgf4_2xDI = RandomB[4*blind_n_rnd +: 4*blind_n_rnd];
+assign _Bgf2_1xDI = RandomB[8*blind_n_rnd +: 2*blind_n_rnd];
+assign _Bgf2_2xDI = RandomB[10*blind_n_rnd +: 2*blind_n_rnd];
+assign _Bgf2_3xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
+assign _Bgf2_4xDI = RandomB[14*blind_n_rnd +: 2*blind_n_rnd];
+assign _Bgf2_5xDI = RandomB[16*blind_n_rnd +: 2*blind_n_rnd];
 
 wire [7:0] XxDI [SHARES-1 : 0];
 wire [7:0] QxDO [SHARES-1 : 0];
@@ -247,19 +277,20 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._XxDI(_Y0sqscmulY1xD ),
-        ._Zmul1xDI(_Zinv1xDI),
-        ._Bmul1xDI(_Binv1xDI),
+        ._Zmul1xDI(_Zgf2_1xDI),
+        ._Bmul1xDI(_Bgf2_1xDI),
         ._QxDO(_InverterOutxD)
     );
 
     // Multiply Inv and Y0 (GF 2^4)
-    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_msb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
 		._XxDI(_Y0sqscmulY1xD), 
 		._YxDI(_Y0_0xDP), 
 		._ZxDI(_Zmul2xDI), 
+        ._BxDI(_Bgf4_1xDI),
 		._QxDO(_InverseMSBxD)
     );
 
@@ -268,13 +299,14 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     assign MSBLSB = _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
 
     // Multiply Y1 and Inv (GF2^4)
-    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_lsb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
 		._XxDI(_Y0sqscmulY1xD), 
 		._YxDI(_Y1_0xDP), 
 		._ZxDI(_Zmul3xDI), 
+        ._BxDI(_Bgf4_2xDI),
 		._QxDO(_InverseLSBxD)
     );
 
@@ -288,8 +320,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
         ._YxDI(_LSBLSB),
-        ._ZxDI(0),
-        ._BxDI(0),
+        ._ZxDI(_Zgf2_2xDI),
+        ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutLSBLSB)
     );
 
@@ -299,8 +331,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
         ._YxDI(_LSBMSB),
-        ._ZxDI(0),
-        ._BxDI(0),
+        ._ZxDI(_Zgf2_3xDI),
+        ._BxDI(_Bgf2_3xDI),
         ._QxDO(_InvOutLSBMSB)
     );
 
@@ -310,8 +342,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
         ._YxDI(_MSBLSB),
-        ._ZxDI(0),
-        ._BxDI(0),
+        ._ZxDI(_Zgf2_4xDI),
+        ._BxDI(_Bgf2_4xDI),
         ._QxDO(_InvOutMSBLSB)
     );
 
@@ -321,8 +353,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .RstxBI(RstxBI),
         ._XxDI(_InverterOutxD),
         ._YxDI(_MSBMSB),
-        ._ZxDI(0),
-        ._BxDI(0),
+        ._ZxDI(_Zgf2_5xDI),
+        ._BxDI(_Bgf2_5xDI),
         ._QxDO(_InvOutMSBMSB)
     );
 

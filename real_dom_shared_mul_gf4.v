@@ -11,18 +11,22 @@ module real_dom_shared_mul_gf4 #(
     _BxDI,
     _QxDO
 );
+
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
+
 input ClkxCI;
 input RstxBI;
 input [4*SHARES-1 : 0] _XxDI;
 input [4*SHARES-1 : 0] _YxDI;
 input [2*SHARES*(SHARES-1)-1 : 0] _ZxDI;
-input [4*SHARES-1 : 0] _BxDI;
+input [4*blind_n_rnd-1 : 0] _BxDI;
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];
 wire [3:0] YxDI [SHARES-1 : 0];
 wire [3:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
-wire [3:0] BxDI [SHARES-1 : 0];
+wire [3:0] BxDI [blind_n_rnd-1 : 0];
 wire [3:0] QxDO [SHARES-1 : 0];
 
 genvar i;
@@ -31,10 +35,26 @@ for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
         assign XxDI[i][j] = _XxDI[i*4+j];
         assign YxDI[i][j] = _YxDI[i*4+j];
-        assign BxDI[i][j] = _BxDI[i*4+j];
+        // assign BxDI[i][j] = _BxDI[i*4+j];
         assign _QxDO[i*4+j] = QxDO[i][j];
     end
 end
+
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    for (i = 0; i < SHARES-1; i=i+1) begin
+        for (j = 0; j < 4; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*2+j];
+        end
+    end
+end
+else begin
+    for (i = 0; i < SHARES; i=i+1) begin
+        for (j = 0; j < 4; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*2+j];
+        end
+    end    
+end
+
 
 for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin

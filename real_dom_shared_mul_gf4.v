@@ -50,7 +50,7 @@ end
 else begin
     for (i = 0; i < SHARES; i=i+1) begin
         for (j = 0; j < 4; j=j+1) begin
-            assign BxDI[i][j] = _BxDI[i*2+j];
+            assign BxDI[i][j] = _BxDI[i*4+j];
         end
     end    
 end

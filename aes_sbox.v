@@ -147,7 +147,7 @@ for (i = 0; i < SHARES; i=i+1) begin
         assign _MSBLSB[i*2+j] = _InverseMSBxD[i*4+j];
         assign _MSBMSB[i*2+j] = _InverseMSBxD[i*4+j+2];
     end
-    assign _GF256InvxD_shbyte[i*8+:8] = {_InvOutMSBMSB[i*SHARES+:2], _InvOutMSBLSB[i*SHARES+:2], _InvOutLSBMSB[i*SHARES+:2], _InvOutLSBLSB[i*SHARES+:2]};
+    assign _GF256InvxD_shbyte[i*8+:8] = {_InvOutMSBMSB[i*2+:2], _InvOutMSBLSB[i*2+:2], _InvOutLSBMSB[i*2+:2], _InvOutLSBLSB[i*2+:2]};
 end
 
 for (i = 0; i < SHARES; i=i+1) begin
@@ -284,9 +284,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._QxDO(_InverseMSBxD)
     );
 
-    assign MSBMSB = _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
+    assign MSBMSB = _InverseMSBxD[11:10] ^ _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
 
-    assign MSBLSB = _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
+    assign MSBLSB = _InverseMSBxD[9:8] ^ _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
 
     // Multiply Y1 and Inv (GF2^4)
     real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
@@ -300,9 +300,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._QxDO(_InverseLSBxD)
     );
 
-    assign LSBMSB = _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
+    assign LSBMSB = _InverseLSBxD[11:10] ^ _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
 
-    assign LSBLSB = _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
+    assign LSBLSB = _InverseLSBxD[9:8] ^ _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
 
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_0 (

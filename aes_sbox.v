@@ -296,7 +296,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._YxDI(_Y0sqscmulY1xD),
 		._XxDI(_Y1_0xDP),
 		._ZxDI(_Zmul3xDI), 
-        ._BxDI(_Bgf4_2xDI),
+        ._BxDI(_Bgf4_1xDI),
 		._QxDO(_InverseLSBxD)
     );
 
@@ -322,7 +322,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._YxDI(_InverterOutxD),
         ._XxDI(_LSBMSB),
         ._ZxDI(_Zgf2_3xDI),
-        ._BxDI(_Bgf2_3xDI),
+        ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutLSBMSB)
     );
 
@@ -333,7 +333,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._XxDI(_InverterOutxD),
         ._YxDI(_MSBLSB),
         ._ZxDI(_Zgf2_4xDI),
-        ._BxDI(_Bgf2_4xDI),
+        ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutMSBLSB)
     );
 
@@ -344,7 +344,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._YxDI(_InverterOutxD),
         ._XxDI(_MSBMSB),
         ._ZxDI(_Zgf2_5xDI),
-        ._BxDI(_Bgf2_5xDI),
+        ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutMSBMSB)
     );
 

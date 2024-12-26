@@ -255,8 +255,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_Y1xD),
-        ._YxDI(_Y0xD),
+        ._YxDI(_Y1xD),
+        ._XxDI(_Y0xD),
         ._ZxDI(_Zmul1xDI),
         ._QxDO(_Y0sqscmulY1xD)
     );
@@ -277,8 +277,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     mult_msb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
-		._XxDI(_Y0sqscmulY1xD), 
-		._YxDI(_Y0_0xDP), 
+		._YxDI(_Y0sqscmulY1xD),
+		._XxDI(_Y0_0xDP),
 		._ZxDI(_Zmul2xDI), 
         ._BxDI(_Bgf4_1xDI),
 		._QxDO(_InverseMSBxD)
@@ -293,8 +293,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     mult_lsb (
 		.ClkxCI(ClkxCI),
 		.RstxBI(RstxBI),
-		._XxDI(_Y0sqscmulY1xD), 
-		._YxDI(_Y1_0xDP), 
+		._YxDI(_Y0sqscmulY1xD),
+		._XxDI(_Y1_0xDP),
 		._ZxDI(_Zmul3xDI), 
         ._BxDI(_Bgf4_2xDI),
 		._QxDO(_InverseLSBxD)
@@ -308,8 +308,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     theta_mul_0 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_InverterOutxD),
-        ._YxDI(_LSBLSB),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBLSB),
         ._ZxDI(_Zgf2_2xDI),
         ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutLSBLSB)
@@ -319,8 +319,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     theta_mul_1 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_InverterOutxD),
-        ._YxDI(_LSBMSB),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBMSB),
         ._ZxDI(_Zgf2_3xDI),
         ._BxDI(_Bgf2_3xDI),
         ._QxDO(_InvOutLSBMSB)
@@ -341,8 +341,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     theta_mul_3 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_InverterOutxD),
-        ._YxDI(_MSBMSB),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBMSB),
         ._ZxDI(_Zgf2_5xDI),
         ._BxDI(_Bgf2_5xDI),
         ._QxDO(_InvOutMSBMSB)

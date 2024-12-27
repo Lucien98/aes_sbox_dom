@@ -273,31 +273,44 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     );
 
     // Multiply Inv and Y0 (GF 2^4)
-    real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
-    mult_msb (
-		.ClkxCI(ClkxCI),
-		.RstxBI(RstxBI),
-		._YxDI(_Y0sqscmulY1xD),
-		._XxDI(_Y0_0xDP),
-		._ZxDI(_Zmul2xDI), 
-        ._BxDI(_Bgf4_1xDI),
-		._QxDO(_InverseMSBxD)
-    );
+    // real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    // mult_msb (
+	// 	.ClkxCI(ClkxCI),
+	// 	.RstxBI(RstxBI),
+	// 	._YxDI(_Y0sqscmulY1xD),
+	// 	._XxDI(_Y0_0xDP),
+	// 	._ZxDI(_Zmul2xDI), 
+    //     ._BxDI(_Bgf4_1xDI),
+	// 	._QxDO(_InverseMSBxD)
+    // );
 
     // assign MSBMSB = _InverseMSBxD[11:10] ^ _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
 
     // assign MSBLSB = _InverseMSBxD[9:8] ^ _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
 
     // Multiply Y1 and Inv (GF2^4)
-    real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    // real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    // mult_lsb (
+	// 	.ClkxCI(ClkxCI),
+	// 	.RstxBI(RstxBI),
+	// 	._YxDI(_Y0sqscmulY1xD),
+	// 	._XxDI(_Y1_0xDP),
+	// 	._ZxDI(_Zmul3xDI), 
+    //     ._BxDI(_Bgf4_1xDI),
+	// 	._QxDO(_InverseLSBxD)
+    // );
+
+    real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
     mult_lsb (
-		.ClkxCI(ClkxCI),
-		.RstxBI(RstxBI),
-		._YxDI(_Y0sqscmulY1xD),
-		._XxDI(_Y1_0xDP),
-		._ZxDI(_Zmul3xDI), 
+        .ClkxCI(ClkxCI),
+        .RstxBI(RstxBI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._X1xDI(_Y0_0xDP),
+        ._X2xDI(_Y1_0xDP),
+        ._ZxDI(_Zmul3xDI), 
         ._BxDI(_Bgf4_1xDI),
-		._QxDO(_InverseLSBxD)
+        ._Q2xDO(_InverseLSBxD),
+        ._Q1xDO(_InverseMSBxD)
     );
 
     // assign LSBMSB = _InverseLSBxD[11:10] ^ _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];

@@ -317,49 +317,69 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 
     // assign LSBLSB = _InverseLSBxD[9:8] ^ _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
 
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    theta_mul_0 (
+    real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_quad (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
         ._YxDI(_InverterOutxD),
-        ._XxDI(_LSBLSB),
-        ._ZxDI(_Zgf2_2xDI),
+        ._X1xDI(_LSBLSB),
+        ._X2xDI(_LSBMSB),
+        ._X3xDI(_MSBLSB),
+        ._X4xDI(_MSBMSB),
+        ._Z1xDI(_Zgf2_2xDI),
+        ._Z2xDI(_Zgf2_3xDI),
+        ._Z3xDI(_Zgf2_4xDI),
+        ._Z4xDI(_Zgf2_5xDI),
         ._BxDI(_Bgf2_2xDI),
-        ._QxDO(_InvOutLSBLSB)
+        ._Q1xDO(_InvOutLSBLSB),
+        ._Q2xDO(_InvOutLSBMSB),
+        ._Q3xDO(_InvOutMSBLSB),
+        ._Q4xDO(_InvOutMSBMSB)
     );
 
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    theta_mul_1 (
-        .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_LSBMSB),
-        ._ZxDI(_Zgf2_3xDI),
-        ._BxDI(_Bgf2_2xDI),
-        ._QxDO(_InvOutLSBMSB)
-    );
+    // real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    // theta_mul_0 (
+    //     .ClkxCI(ClkxCI),
+    //     .RstxBI(RstxBI),
+    //     ._YxDI(_InverterOutxD),
+    //     ._XxDI(_LSBLSB),
+    //     ._ZxDI(_Zgf2_2xDI),
+    //     ._BxDI(_Bgf2_2xDI),
+    //     ._QxDO(_InvOutLSBLSB)
+    // );
 
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    theta_mul_2 (
-        .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_MSBLSB),
-        ._ZxDI(_Zgf2_4xDI),
-        ._BxDI(_Bgf2_2xDI),
-        ._QxDO(_InvOutMSBLSB)
-    );
+    // real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    // theta_mul_1 (
+    //     .ClkxCI(ClkxCI),
+    //     .RstxBI(RstxBI),
+    //     ._YxDI(_InverterOutxD),
+    //     ._XxDI(_LSBMSB),
+    //     ._ZxDI(_Zgf2_3xDI),
+    //     ._BxDI(_Bgf2_2xDI),
+    //     ._QxDO(_InvOutLSBMSB)
+    // );
 
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    theta_mul_3 (
-        .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_MSBMSB),
-        ._ZxDI(_Zgf2_5xDI),
-        ._BxDI(_Bgf2_2xDI),
-        ._QxDO(_InvOutMSBMSB)
-    );
+    // real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    // theta_mul_2 (
+    //     .ClkxCI(ClkxCI),
+    //     .RstxBI(RstxBI),
+    //     ._YxDI(_InverterOutxD),
+    //     ._XxDI(_MSBLSB),
+    //     ._ZxDI(_Zgf2_4xDI),
+    //     ._BxDI(_Bgf2_2xDI),
+    //     ._QxDO(_InvOutMSBLSB)
+    // );
+
+    // real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    // theta_mul_3 (
+    //     .ClkxCI(ClkxCI),
+    //     .RstxBI(RstxBI),
+    //     ._YxDI(_InverterOutxD),
+    //     ._XxDI(_MSBMSB),
+    //     ._ZxDI(_Zgf2_5xDI),
+    //     ._BxDI(_Bgf2_2xDI),
+    //     ._QxDO(_InvOutMSBMSB)
+    // );
 
 
 

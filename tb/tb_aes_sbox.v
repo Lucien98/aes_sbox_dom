@@ -14,7 +14,7 @@ module tb_aes_sbox ();
     `include "blind.vh"
     localparam blind_n_rnd = _blind_nrnd(SHARES);
     reg [11*SHARES*(SHARES-1)-1 : 0] RandomZ;
-    reg [2*9*blind_n_rnd-1:0] RandomB;
+    reg [2*4*blind_n_rnd-1:0] RandomB;
 
     wire [8*SHARES-1 : 0] _XxDI;
     wire [8*SHARES-1 : 0] _QxDO;

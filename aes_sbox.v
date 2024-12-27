@@ -24,14 +24,14 @@ input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
 
 input [11*SHARES*(SHARES-1)-1 : 0] RandomZ;
-input [2*9*blind_n_rnd-1:0] RandomB;
+input [2*4*blind_n_rnd-1:0] RandomB;
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 wire [4*blind_n_rnd-1 : 0] _Bgf4_1xDI; // for mul_gf4 in the second stage
-wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI; // ...
+// wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI; // ...
 
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_1xDI; // for mul_gf2
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_2xDI;
@@ -40,9 +40,9 @@ wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_4xDI;
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_5xDI;
 wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI; // for mul_gf2
 wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI; // ...
-wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI; // ...
-wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
-wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
+// wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI; // ...
+// wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
+// wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
 
 assign _Zmul1xDI = RandomZ[0*n_random_z+:2*n_random_z];
 assign _Zmul2xDI = RandomZ[2*n_random_z+:2*n_random_z];
@@ -54,12 +54,12 @@ assign _Zgf2_4xDI = RandomZ[9*n_random_z+:n_random_z];
 assign _Zgf2_5xDI = RandomZ[10*n_random_z+:n_random_z];
 
 assign _Bgf4_1xDI = RandomB[0*blind_n_rnd +: 4*blind_n_rnd];
-assign _Bgf4_2xDI = RandomB[4*blind_n_rnd +: 4*blind_n_rnd];
-assign _Bgf2_1xDI = RandomB[8*blind_n_rnd +: 2*blind_n_rnd];
-assign _Bgf2_2xDI = RandomB[10*blind_n_rnd +: 2*blind_n_rnd];
-assign _Bgf2_3xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
-assign _Bgf2_4xDI = RandomB[14*blind_n_rnd +: 2*blind_n_rnd];
-assign _Bgf2_5xDI = RandomB[16*blind_n_rnd +: 2*blind_n_rnd];
+// assign _Bgf4_2xDI = RandomB[4*blind_n_rnd +: 4*blind_n_rnd];
+assign _Bgf2_1xDI = RandomB[4*blind_n_rnd +: 2*blind_n_rnd];
+assign _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
+// assign _Bgf2_3xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
+// assign _Bgf2_4xDI = RandomB[14*blind_n_rnd +: 2*blind_n_rnd];
+// assign _Bgf2_5xDI = RandomB[16*blind_n_rnd +: 2*blind_n_rnd];
 
 wire [7:0] XxDI [SHARES-1 : 0];
 wire [7:0] QxDO [SHARES-1 : 0];
@@ -284,9 +284,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._QxDO(_InverseMSBxD)
     );
 
-    assign MSBMSB = _InverseMSBxD[11:10] ^ _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
+    // assign MSBMSB = _InverseMSBxD[11:10] ^ _InverseMSBxD[7:6] ^ _InverseMSBxD[3:2];
 
-    assign MSBLSB = _InverseMSBxD[9:8] ^ _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
+    // assign MSBLSB = _InverseMSBxD[9:8] ^ _InverseMSBxD[5:4] ^ _InverseMSBxD[1:0];
 
     // Multiply Y1 and Inv (GF2^4)
     real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
@@ -300,9 +300,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._QxDO(_InverseLSBxD)
     );
 
-    assign LSBMSB = _InverseLSBxD[11:10] ^ _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
+    // assign LSBMSB = _InverseLSBxD[11:10] ^ _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
 
-    assign LSBLSB = _InverseLSBxD[9:8] ^ _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
+    // assign LSBLSB = _InverseLSBxD[9:8] ^ _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
 
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_0 (

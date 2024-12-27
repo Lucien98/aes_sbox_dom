@@ -330,8 +330,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     theta_mul_2 (
         .ClkxCI(ClkxCI),
         .RstxBI(RstxBI),
-        ._XxDI(_InverterOutxD),
-        ._YxDI(_MSBLSB),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBLSB),
         ._ZxDI(_Zgf2_4xDI),
         ._BxDI(_Bgf2_2xDI),
         ._QxDO(_InvOutMSBLSB)

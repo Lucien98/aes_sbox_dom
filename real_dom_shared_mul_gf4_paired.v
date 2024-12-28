@@ -8,7 +8,8 @@ module real_dom_shared_mul_gf4_paired #(
     _X1xDI,
     _X2xDI,
     _YxDI,
-    _ZxDI,
+    _Z1xDI,
+    _Z2xDI,
     _BxDI,
     _Q1xDO,
     _Q2xDO
@@ -22,7 +23,8 @@ input RstxBI;
 input [4*SHARES-1 : 0] _X1xDI;
 input [4*SHARES-1 : 0] _X2xDI;
 input [4*SHARES-1 : 0] _YxDI;
-input [2*SHARES*(SHARES-1)-1 : 0] _ZxDI;
+input [2*SHARES*(SHARES-1)-1 : 0] _Z1xDI;
+input [2*SHARES*(SHARES-1)-1 : 0] _Z2xDI;
 input [4*blind_n_rnd-1 : 0] _BxDI;
 output [4*SHARES-1 : 0] _Q1xDO;
 output [4*SHARES-1 : 0] _Q2xDO;
@@ -30,7 +32,8 @@ output [4*SHARES-1 : 0] _Q2xDO;
 wire [3:0] X1xDI [SHARES-1 : 0];
 wire [3:0] X2xDI [SHARES-1 : 0];
 wire [3:0] YxDI [SHARES-1 : 0];
-wire [3:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [3:0] Z1xDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [3:0] Z2xDI [(SHARES*(SHARES-1)/2)-1 : 0];
 wire [3:0] BxDI [blind_n_rnd-1 : 0];
 wire [3:0] Q1xDO [SHARES-1 : 0];
 wire [3:0] Q2xDO [SHARES-1 : 0];
@@ -66,7 +69,8 @@ end
 
 for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
     for (j = 0; j < 4; j=j+1) begin
-        assign ZxDI[i][j] = _ZxDI[i*4+j];
+        assign Z1xDI[i][j] = _Z1xDI[i*4+j];
+        assign Z2xDI[i][j] = _Z2xDI[i*4+j];
     end
 end
 
@@ -148,11 +152,11 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     end
 
     // Remask X * B ... + Z
-    assign X1_times_B_remaskedxDN[0] = X1_times_BxD[0] ^ ZxDI[0];
-    assign X1_times_B_remaskedxDN[1] = X1_times_BxD[1] ^ ZxDI[0];
+    assign X1_times_B_remaskedxDN[0] = X1_times_BxD[0] ^ Z1xDI[0];
+    assign X1_times_B_remaskedxDN[1] = X1_times_BxD[1] ^ Z1xDI[0];
 
-    assign X2_times_B_remaskedxDN[0] = X2_times_BxD[0] ^ ZxDI[0];
-    assign X2_times_B_remaskedxDN[1] = X2_times_BxD[1] ^ ZxDI[0];
+    assign X2_times_B_remaskedxDN[0] = X2_times_BxD[0] ^ Z2xDI[0];
+    assign X2_times_B_remaskedxDN[1] = X2_times_BxD[1] ^ Z2xDI[0];
 
     // Output
     assign Q1xDO[0] = X1timesYxS[0] /*^ X1timesBlindedY[0]*/ ^ X1_times_B_remaskedxDP[0];
@@ -275,7 +279,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
         .RstxBI(RstxBI),
         ._XxDI(_X1xDI),
         ._YxDI(_BxDI),
-        ._ZxDI(_ZxDI),
+        ._ZxDI(_Z1xDI),
         ._QxDO(_X1timesBxD)
     );
 
@@ -284,7 +288,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
         .RstxBI(RstxBI),
         ._XxDI(_X2xDI),
         ._YxDI(_BxDI),
-        ._ZxDI(_ZxDI),
+        ._ZxDI(_Z2xDI),
         ._QxDO(_X2timesBxD)
     );
 

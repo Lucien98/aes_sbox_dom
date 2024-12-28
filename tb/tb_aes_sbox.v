@@ -1,5 +1,14 @@
 `timescale 1ns/1ps
 module tb_aes_sbox ();
+    function integer _n_rndz(input integer d);
+    begin
+    if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
+    else if (d==2) _n_rndz = 9;
+    else _n_rndz = 11;
+    end
+    endfunction
+    localparam coeff = _n_rndz(SHARES);
+
     localparam T=2.0;
 	localparam Td = T/2.0;
 
@@ -13,7 +22,7 @@ module tb_aes_sbox ();
 	reg RstxBI;
     `include "blind.vh"
     localparam blind_n_rnd = _blind_nrnd(SHARES);
-    reg [11*SHARES*(SHARES-1)-1 : 0] RandomZ;
+    reg [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;
     reg [2*4*blind_n_rnd-1:0] RandomB;
 
     wire [8*SHARES-1 : 0] _XxDI;
@@ -46,7 +55,7 @@ module tb_aes_sbox ();
 	always@(*) #Td ClkxCI<=~ClkxCI;
 
 	initial begin
-        ClkxCI = 0;
+        ClkxCI = 1;
 		RstxBI = 0;
         #T;
         RstxBI = 1;

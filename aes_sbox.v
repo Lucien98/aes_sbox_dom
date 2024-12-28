@@ -16,14 +16,23 @@ module aes_sbox #(
 );
 
 `include "blind.vh"
+function integer _n_rndz(input integer d);
+begin
+if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
+else if (d==2) _n_rndz = 9;
+else _n_rndz = 11;
+end
+endfunction
+
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam n_random_z = SHARES*(SHARES-1);
+localparam coeff = _n_rndz(SHARES);
 
 input ClkxCI;
 input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
 
-input [11*SHARES*(SHARES-1)-1 : 0] RandomZ;
+input [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;
 input [2*4*blind_n_rnd-1:0] RandomB;
 output [8*SHARES-1 : 0] _QxDO;
 
@@ -44,14 +53,14 @@ wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI; // ...
 // wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
 // wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
 
-assign _Zmul1xDI = RandomZ[0*n_random_z+:2*n_random_z];
-assign _Zmul2xDI = RandomZ[2*n_random_z+:2*n_random_z];
-assign _Zmul3xDI = RandomZ[4*n_random_z+:2*n_random_z];
-assign _Zgf2_1xDI = RandomZ[6*n_random_z+:n_random_z];
-assign _Zgf2_2xDI = RandomZ[7*n_random_z+:n_random_z];
-assign _Zgf2_3xDI = RandomZ[8*n_random_z+:n_random_z];
-assign _Zgf2_4xDI = RandomZ[9*n_random_z+:n_random_z];
-assign _Zgf2_5xDI = RandomZ[10*n_random_z+:n_random_z];
+assign _Zmul1xDI = RandomZ[5*n_random_z+:2*n_random_z];
+assign _Zmul2xDI = RandomZ[7*n_random_z+:2*n_random_z];
+assign _Zmul3xDI = RandomZ[(coeff-2)*n_random_z+:2*n_random_z];
+assign _Zgf2_1xDI = RandomZ[0*n_random_z+:n_random_z];
+assign _Zgf2_2xDI = RandomZ[1*n_random_z+:n_random_z];
+assign _Zgf2_3xDI = RandomZ[2*n_random_z+:n_random_z];
+assign _Zgf2_4xDI = RandomZ[3*n_random_z+:n_random_z];
+assign _Zgf2_5xDI = RandomZ[4*n_random_z+:n_random_z];
 
 assign _Bgf4_1xDI = RandomB[0*blind_n_rnd +: 4*blind_n_rnd];
 // assign _Bgf4_2xDI = RandomB[4*blind_n_rnd +: 4*blind_n_rnd];
@@ -307,7 +316,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._YxDI(_Y0sqscmulY1xD),
         ._X1xDI(_Y0_0xDP),
         ._X2xDI(_Y1_0xDP),
-        ._ZxDI(_Zmul3xDI), 
+        ._Z1xDI(_Zmul2xDI), 
+        ._Z2xDI(_Zmul3xDI), 
         ._BxDI(_Bgf4_1xDI),
         ._Q2xDO(_InverseLSBxD),
         ._Q1xDO(_InverseMSBxD)

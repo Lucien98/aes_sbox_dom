@@ -70,8 +70,8 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     assign X2_times_B_remaskedxDN[1] = X2_times_BxD[1] ^ Z2xDI[0];
 
     // Output
-    assign Q2xDO[0] = X2timesYxS[0] ^ X2timesBlindedY[0] ^ X2_times_B_remaskedxDP[0];
-    assign Q2xDO[1] = X2timesYxS[1] ^ X2timesBlindedY[1] ^ X2_times_B_remaskedxDP[1];
+    assign Q2xDO[0] = X2timesYxS[0] /*^ X2timesBlindedY[0]*/ ^ X2_times_B_remaskedxDP[0];
+    assign Q2xDO[1] = X2timesYxS[1] /*^ X2timesBlindedY[1]*/ ^ X2_times_B_remaskedxDP[1];
 
 
     // Remask multiplication results from different domains
@@ -91,15 +91,15 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     for (i = 0; i < SHARES; i = i + 1) begin
         gf2_mul #(.N(2)) x_times_y(
             .AxDI(X2xD[i]),
-            .BxDI(YxD[i]),
+            .BxDI(YxD[i]^BlindedYxDP[i]),
             .QxDO(X2timesYxS[i])
         );
 
-        gf2_mul #(.N(2)) x_times_blinded_y(
-            .AxDI(X2xD[i]),
-            .BxDI(BlindedYxDP[i]),
-            .QxDO(X2timesBlindedY[i])
-        );
+        // gf2_mul #(.N(2)) x_times_blinded_y(
+        //     .AxDI(X2xD[i]),
+        //     .BxDI(BlindedYxDP[i]),
+        //     .QxDO(X2timesBlindedY[i])
+        // );
 
         gf2_mul #(.N(2)) x_times_b(
             .AxDI(X2xDI[i]),

@@ -253,8 +253,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             assign QxDO[i] = InvMappedxD[i];
         end
         else begin // Add "b" only once
-            assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
-            // assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
+            // assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
+            assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
         end
     end
 

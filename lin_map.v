@@ -27,54 +27,54 @@ wire				R9;
 
 wire	[07:00]		B;
 
-assign DataOutxDO = DataInxDI;
+// assign DataOutxDO = DataInxDI;
 
-// if (MATRIX_SEL == 1) begin
-//     assign R1 =  DataInxDI[7] ^ DataInxDI[5];
-//     assign R2 = ~DataInxDI[7] ^ DataInxDI[4];
-//     assign R3 =  DataInxDI[6] ^ DataInxDI[0];
-//     assign R4 = ~DataInxDI[5] ^ R3;
-//     assign R5 =  DataInxDI[4] ^ R4;
-//     assign R6 =  DataInxDI[3] ^ DataInxDI[0];
-//     assign R7 =  DataInxDI[2] ^ R1;
-//     assign R8 =  DataInxDI[1] ^ R3;
-//     assign R9 =  DataInxDI[3] ^ R8;
+if (MATRIX_SEL == 1) begin
+    assign R1 =  DataInxDI[7] ^ DataInxDI[5];
+    assign R2 = ~DataInxDI[7] ^ DataInxDI[4];
+    assign R3 =  DataInxDI[6] ^ DataInxDI[0];
+    assign R4 = ~DataInxDI[5] ^ R3;
+    assign R5 =  DataInxDI[4] ^ R4;
+    assign R6 =  DataInxDI[3] ^ DataInxDI[0];
+    assign R7 =  DataInxDI[2] ^ R1;
+    assign R8 =  DataInxDI[1] ^ R3;
+    assign R9 =  DataInxDI[3] ^ R8;
 
-//     assign B[7] = ~R7 ^ R8;
-//     assign B[6] =  R5;
-//     assign B[5] =  DataInxDI[1] ^ R4;
-//     assign B[4] = ~R1 ^ R3;
-//     assign B[3] =  DataInxDI[1] ^ R2 ^ R6;
-//     assign B[2] = ~DataInxDI[0];
-//     assign B[1] =  R4;
-//     assign B[0] = ~DataInxDI[2] ^ R9;
+    assign B[7] = ~R7 ^ R8;
+    assign B[6] =  R5;
+    assign B[5] =  DataInxDI[1] ^ R4;
+    assign B[4] = ~R1 ^ R3;
+    assign B[3] =  DataInxDI[1] ^ R2 ^ R6;
+    assign B[2] = ~DataInxDI[0];
+    assign B[1] =  R4;
+    assign B[0] = ~DataInxDI[2] ^ R9;
 
-//     assign DataOutxDO = ~B;
-// end
-// else if (MATRIX_SEL == 0) begin
-//     assign R1 =  DataInxDI[7] ^ DataInxDI[3];
-// 	assign R2 =  DataInxDI[6] ^ DataInxDI[4];
-// 	assign R3 =  DataInxDI[6] ^ DataInxDI[0];
-// 	assign R4 = ~DataInxDI[5] ^ DataInxDI[3];
-// 	assign R5 = ~DataInxDI[5] ^ R1;
-// 	assign R6 = ~DataInxDI[5] ^ DataInxDI[1];
-// 	assign R7 = ~DataInxDI[4] ^ R6;
-// 	assign R8 =  DataInxDI[2] ^ R4;
-// 	assign R9 =  DataInxDI[1] ^ R2;
+    assign DataOutxDO = ~B;
+end
+else if (MATRIX_SEL == 0) begin
+    assign R1 =  DataInxDI[7] ^ DataInxDI[3];
+	assign R2 =  DataInxDI[6] ^ DataInxDI[4];
+	assign R3 =  DataInxDI[6] ^ DataInxDI[0];
+	assign R4 = ~DataInxDI[5] ^ DataInxDI[3];
+	assign R5 = ~DataInxDI[5] ^ R1;
+	assign R6 = ~DataInxDI[5] ^ DataInxDI[1];
+	assign R7 = ~DataInxDI[4] ^ R6;
+	assign R8 =  DataInxDI[2] ^ R4;
+	assign R9 =  DataInxDI[1] ^ R2;
 	
-// 	assign B[7] = R4;
-// 	assign B[6] = R1;
-// 	assign B[5] = R3;
-// 	assign B[4] = R5;
-// 	assign B[3] = R2 ^ R5;
-// 	assign B[2] = R3 ^ R8;
-// 	assign B[1] = R7;
-// 	assign B[0] = R9;
+	assign B[7] = R4;
+	assign B[6] = R1;
+	assign B[5] = R3;
+	assign B[4] = R5;
+	assign B[3] = R2 ^ R5;
+	assign B[2] = R3 ^ R8;
+	assign B[1] = R7;
+	assign B[0] = R9;
 	
-// 	assign DataOutxDO[7]   = ~B[7];
-// 	assign DataOutxDO[6:5] =  B[6:5];
-// 	assign DataOutxDO[4:2] = ~B[4:2];
-// 	assign DataOutxDO[1:0] =  B[1:0];
-// end
+	assign DataOutxDO[7]   = ~B[7];
+	assign DataOutxDO[6:5] =  B[6:5];
+	assign DataOutxDO[4:2] = ~B[4:2];
+	assign DataOutxDO[1:0] =  B[1:0];
+end
 
 endmodule

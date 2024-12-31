@@ -350,7 +350,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_0 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._YxDI(_InverterOutxD),
         ._XxDI(_LSBLSB),
         ._ZxDI(_Zgf2_2xDI),
@@ -361,7 +361,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_1 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._YxDI(_InverterOutxD),
         ._XxDI(_LSBMSB),
         ._ZxDI(_Zgf2_3xDI),
@@ -372,7 +372,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_2 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._YxDI(_InverterOutxD),
         ._XxDI(_MSBLSB),
         ._ZxDI(_Zgf2_4xDI),
@@ -383,7 +383,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_3 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._YxDI(_InverterOutxD),
         ._XxDI(_MSBMSB),
         ._ZxDI(_Zgf2_5xDI),

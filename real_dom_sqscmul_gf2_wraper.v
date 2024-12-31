@@ -6,7 +6,7 @@ module real_dom_sqscmul_gf2_wraper #(
     parameter SHARES = 2
 ) (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     // masked input
     _XxDI,
     // Fresh masks
@@ -20,7 +20,7 @@ module real_dom_sqscmul_gf2_wraper #(
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul1xDI;
@@ -86,7 +86,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
     a_sqscmul_b
     (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_A),
         ._YxDI(_B),
         ._ZxDI(_Zmul1xDI),

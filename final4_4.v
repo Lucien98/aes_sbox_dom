@@ -76,15 +76,15 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
 
     // Remask multiplication results from different domains
     // process x_times_b_register_p
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-        if (~RstxBI) begin // asynchronous reset (active low)
-            X4_times_B_remaskedxDP[0] = 2'b00;
-            X4_times_B_remaskedxDP[1] = 2'b00;
-        end
-        else begin // rising clock edge
+    always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     X4_times_B_remaskedxDP[0] = 2'b00;
+        //     X4_times_B_remaskedxDP[1] = 2'b00;
+        // end
+        // else begin // rising clock edge
             X4_times_B_remaskedxDP[0] = X4_times_B_remaskedxDN[0];
             X4_times_B_remaskedxDP[1] = X4_times_B_remaskedxDN[1];
-        end
+        // end
     end
 
     // Multipliers
@@ -138,7 +138,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
 
     shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_X4xDI),
         ._YxDI(_BxDI),
         ._ZxDI(_Z4xDI),
@@ -155,18 +155,18 @@ end
 // General stuff used for all variants:
 // Use pipelining --> X needs to be registered
 if (PIPELINED == 1) begin
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-    // always @(posedge ClkxCI) begin : proc_
+    // always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    always @(posedge ClkxCI) begin : proc_
         integer k;
-        if (~RstxBI) begin // asynchronous reset (active low)
-            for (k = 0; k < SHARES; k = k + 1) begin
-                X4xDP[k] = 2'b00;
-            end
-        end
-        else begin // rising clock edge
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     for (k = 0; k < SHARES; k = k + 1) begin
+        //         X4xDP[k] = 2'b00;
+        //     end
+        // end
+        // else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 X4xDP[k] = X4xDI[k];
             end
-        end
+        // end
     end
 end

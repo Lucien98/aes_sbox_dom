@@ -4,7 +4,7 @@ module real_dom_shared_mul_gf2_quadruple #(
     parameter SHARES = 2
 ) (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     _X1xDI,
     _X2xDI,
     _X3xDI,
@@ -25,7 +25,7 @@ module real_dom_shared_mul_gf2_quadruple #(
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 input [2*SHARES-1 : 0] _YxDI;
 input [2*blind_n_rnd-1 : 0] _BxDI;
 
@@ -125,37 +125,37 @@ end
 // General stuff used for all variants:
 // Use pipelining --> X needs to be registered
 if (PIPELINED == 1) begin
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
     // always @(posedge ClkxCI) begin : proc_
         integer k;
-        if (~RstxBI) begin // asynchronous reset (active low)
-            for (k = 0; k < SHARES; k = k + 1) begin
-                // XxDP[k] = 2'b00;
-                YxDP[k] = 2'b00;
-            end
-        end
-        else begin // rising clock edge
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     for (k = 0; k < SHARES; k = k + 1) begin
+        //         // XxDP[k] = 2'b00;
+        //         YxDP[k] = 2'b00;
+        //     end
+        // end
+        // else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 // XxDP[k] = XxDI[k];
                 YxDP[k] = YxDI[k];
             end
-        end
+        // end
     end
 end
 
 // Blinding register process
-always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
     integer k;
-    if (~RstxBI) begin // asynchronous reset (active low)
-        for (k = 0; k < SHARES; k = k + 1) begin
-            BlindedYxDP[k] = 2'b00;
-        end
-    end
-    else begin // rising clock edge
+    // if (~RstxBI) begin // asynchronous reset (active low)
+    //     for (k = 0; k < SHARES; k = k + 1) begin
+    //         BlindedYxDP[k] = 2'b00;
+    //     end
+    // end
+    // else begin // rising clock edge
         for (k = 0; k < SHARES; k = k + 1) begin
             BlindedYxDP[k] = BlindedYxDN[k];
         end
-    end
+    // end
 end
 
 

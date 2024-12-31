@@ -6,14 +6,14 @@ module shared_mul_gf2
 )
 (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     _XxDI,
     _YxDI,
     _ZxDI,
     _QxDO
 );
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 
 
 input [2*SHARES-1 : 0] _XxDI;
@@ -69,22 +69,22 @@ end
 // outputs: 
 
 // async
-always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
     integer k;
     integer l;
-    if (~RstxBI) begin
-        for (k = 0; k < SHARES; k=k+1) begin
-            for (l = 0; l < SHARES; l=l+1) begin
-                FFxDP[SHARES*k + l] <= 2'b0; 
-            end
-        end
-    end else begin
+    // if (~RstxBI) begin
+    //     for (k = 0; k < SHARES; k=k+1) begin
+    //         for (l = 0; l < SHARES; l=l+1) begin
+    //             FFxDP[SHARES*k + l] <= 2'b0; 
+    //         end
+    //     end
+    // end else begin
         for (k = 0; k < SHARES; k=k+1) begin
             for (l = 0; l < SHARES; l=l+1) begin
                 FFxDP[SHARES*k + l] <= FFxDN[SHARES*k + l];
             end
         end
-    end
+    // end
 end
 
 reg [1:0] result [SHARES-1:0];

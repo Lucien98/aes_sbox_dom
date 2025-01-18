@@ -76,5 +76,7 @@ else if (MATRIX_SEL == 0) begin
 	assign DataOutxDO[4:2] = ~B[4:2];
 	assign DataOutxDO[1:0] =  B[1:0];
 end
-
+else if (MATRIX_SEL == 2) begin
+	assign DataOutxDO = DataInxDI;
+end
 endmodule

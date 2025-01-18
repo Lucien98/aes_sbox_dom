@@ -10,15 +10,18 @@ module shared_sqscmul_gf4
     _XxDI,
     _YxDI,
     _ZxDI,
+    _BxDI,
     _QxDO
 );
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
 input ClkxCI;
 // input RstxBI;
-
 
 input [4*SHARES-1 : 0] _XxDI;
 input [4*SHARES-1 : 0] _YxDI;
 input [2*SHARES*(SHARES-1)-1 : 0] _ZxDI;
+input [4*blind_n_rnd-1 : 0] _BxDI;
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];
@@ -116,7 +119,7 @@ if (PIPELINED == 1) begin
             result[k] = 4'b0000;
             for (l = 0; l < SHARES; l=l+1) begin
                 if (k==l) begin
-                    FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ Y0xorY12xD[k];             // domain term
+                    FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ Y0xorY12xD[k] ^ _BxDI;             // domain term
                 end
                 else if (l > k) begin
                     FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ ZxDI[k + l*(l-1)/2];  // regular term

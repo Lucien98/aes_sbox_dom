@@ -3,7 +3,7 @@ module tb_aes_sbox ();
     function integer _n_rndz(input integer d);
     begin
     if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
-    else if (d==2) _n_rndz = 9;
+    else if (d==2) _n_rndz = 11;
     else _n_rndz = 11;
     end
     endfunction
@@ -23,7 +23,7 @@ module tb_aes_sbox ();
     `include "blind.vh"
     localparam blind_n_rnd = _blind_nrnd(SHARES);
     reg [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;
-    reg [2*4*blind_n_rnd-1:0] RandomB;
+    reg [2*10*blind_n_rnd-1:0] RandomB;
 
     wire [8*SHARES-1 : 0] _XxDI;
     wire [8*SHARES-1 : 0] _QxDO;
@@ -44,7 +44,7 @@ module tb_aes_sbox ();
     aes_sbox #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
     inst_aes_sbox (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_XxDI),
         .RandomZ(RandomZ),
         .RandomB(RandomB),

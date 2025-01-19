@@ -166,6 +166,19 @@ for (i = 0; i < SHARES; i=i+1) begin
     end
 end
 
+wire [8*SHARES-1 : 0] _mappedxD;
+wire [8*SHARES-1 : 0] _mappedxD_bit;
+for (i = 0; i < SHARES; i=i+1) begin
+    assign _mappedxD[8*i +: 8] = mappedxDP[i];
+end
+
+shblk2shbit #(.d(SHARES),.width(8))
+switch_encoding_out (
+    .shblk(_mappedxD),
+    .shbit(_mappedxD_bit)
+);
+
+
 
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
@@ -230,7 +243,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
-        lin_map #(.MATRIX_SEL(1))
+        lin_map #(.MATRIX_SEL(2))
         input_mapping (
             .DataInxDI(XxDI[i]),
             .DataOutxDO(mappedxD[i])

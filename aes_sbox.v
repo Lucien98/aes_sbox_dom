@@ -83,7 +83,7 @@ assign _Bgf2_5xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
 `endif
 
 wire [7:0] XxDI [SHARES-1 : 0];
-wire [7:0] QxDO [SHARES-1 : 0];
+reg [7:0] QxDO [SHARES-1 : 0];
 
 genvar i;
 genvar j;
@@ -250,6 +250,17 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
                 Y1_0xDP[k] = Y1xD[k];
             end
         // end
+        // Output
+        for (k = 0; k < SHARES; k = k + 1) begin
+            if (k > 0) begin
+                QxDO[k] = InvMappedxD[k];
+            end
+            else begin // Add "b" only once
+                // assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
+                QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
+            end
+        end
+
     end
 
     // Generate instances per share...
@@ -270,17 +281,6 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataInxDI(InvUnmappedxD[i]),
             .DataOutxDO(InvMappedxD[i])
         );
-    end
-
-    // Output
-    for (i = 0; i < SHARES; i = i + 1) begin
-        if (i > 0) begin
-            assign QxDO[i] = InvMappedxD[i];
-        end
-        else begin // Add "b" only once
-            // assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
-            assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
-        end
     end
 
     // Single instances:

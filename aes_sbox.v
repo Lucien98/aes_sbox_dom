@@ -33,14 +33,20 @@ input ClkxCI;
 input [8*SHARES-1 : 0] _XxDI;
 
 input [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;
-input [2*10*blind_n_rnd-1:0] RandomB;
+`ifdef RAND_OPT
+input [2*4*blind_n_rnd-1:0] RandomB;
+`else
+input [2*9*blind_n_rnd-1:0] RandomB;
+`endif
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 wire [4*blind_n_rnd-1 : 0] _Bgf4_1xDI; // for mul_gf4 in the second stage
+`ifndef RAND_OPT
 wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI; // ...
+`endif
 
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_1xDI; // for mul_gf2
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_2xDI;
@@ -49,9 +55,11 @@ wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_4xDI;
 wire [SHARES*(SHARES-1)-1 : 0] _Zgf2_5xDI;
 wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI; // for mul_gf2
 wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI; // ...
+`ifndef RAND_OPT
 wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI; // ...
 wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
 wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
+`endif
 
 assign _Zmul1xDI = RandomZ[5*n_random_z+:2*n_random_z];
 assign _Zmul2xDI = RandomZ[7*n_random_z+:2*n_random_z];
@@ -63,12 +71,16 @@ assign _Zgf2_4xDI = RandomZ[3*n_random_z+:n_random_z];
 assign _Zgf2_5xDI = RandomZ[4*n_random_z+:n_random_z];
 
 assign _Bgf4_1xDI = RandomB[0*blind_n_rnd +: 4*blind_n_rnd];
+`ifndef RAND_OPT
 assign _Bgf4_2xDI = RandomB[14*blind_n_rnd +: 4*blind_n_rnd];
+`endif
 assign _Bgf2_1xDI = RandomB[4*blind_n_rnd +: 2*blind_n_rnd];
 assign _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
+`ifndef RAND_OPT
 assign _Bgf2_3xDI = RandomB[8*blind_n_rnd +: 2*blind_n_rnd];
 assign _Bgf2_4xDI = RandomB[10*blind_n_rnd +: 2*blind_n_rnd];
 assign _Bgf2_5xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
+`endif
 
 wire [7:0] XxDI [SHARES-1 : 0];
 wire [7:0] QxDO [SHARES-1 : 0];
@@ -279,7 +291,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         // .RstxBI(RstxBI),
         ._YxDI(_Y1xD),
         ._XxDI(_Y0xD),
-        ._BxDI(RandomB[18*blind_n_rnd +: 2*blind_n_rnd]),
+        // ._BxDI(RandomB[18*blind_n_rnd +: 2*blind_n_rnd]),
         ._ZxDI(_Zmul1xDI),
         ._QxDO(_Y0sqscmulY1xD)
     );
@@ -295,6 +307,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._QxDO(_InverterOutxD)
     );
 
+`ifndef RAND_OPT
     // Multiply Inv and Y0 (GF 2^4)
     real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_msb (
@@ -323,25 +336,28 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 		._QxDO(_InverseLSBxD)
     );
 
-    // real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
-    // mult_lsb (
-    //     .ClkxCI(ClkxCI),
-    //     // .RstxBI(RstxBI),
-    //     ._YxDI(_Y0sqscmulY1xD),
-    //     ._X1xDI(_Y0_0xDP),
-    //     ._X2xDI(_Y1_0xDP),
-    //     ._Z1xDI(_Zmul2xDI), 
-    //     ._Z2xDI(_Zmul3xDI), 
-    //     ._BxDI(_Bgf4_1xDI),
-    //     ._Q2xDO(_InverseLSBxD),
-    //     ._Q1xDO(_InverseMSBxD)
-    // );
+`else
+    real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._X1xDI(_Y0_0xDP),
+        ._X2xDI(_Y1_0xDP),
+        ._Z1xDI(_Zmul2xDI), 
+        ._Z2xDI(_Zmul3xDI), 
+        ._BxDI(_Bgf4_1xDI),
+        ._Q2xDO(_InverseLSBxD),
+        ._Q1xDO(_InverseMSBxD)
+    );
+`endif
 
     // assign LSBMSB = _InverseLSBxD[11:10] ^ _InverseLSBxD[7:6] ^ _InverseLSBxD[3:2];
 
     // assign LSBLSB = _InverseLSBxD[9:8] ^ _InverseLSBxD[5:4] ^ _InverseLSBxD[1:0];
 
-    /*real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+`ifdef RAND_OPT
+    real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_quad (
         .ClkxCI(ClkxCI),
         // .RstxBI(RstxBI),
@@ -360,7 +376,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._Q3xDO(_InvOutMSBLSB),
         ._Q4xDO(_InvOutMSBMSB)
     );
-*/
+
+`else
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(0), .SHARES(SHARES))
     theta_mul_0 (
         .ClkxCI(ClkxCI),
@@ -405,6 +422,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._QxDO(_InvOutMSBMSB)
     );
 
+`endif
 
 
 end

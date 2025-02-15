@@ -4,7 +4,7 @@ module real_dom_shared_mul_gf2 #(
     parameter SHARES = 2
 ) (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     _XxDI,
     _YxDI,
     _ZxDI,
@@ -16,7 +16,7 @@ module real_dom_shared_mul_gf2 #(
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 input [2*SHARES-1 : 0] _XxDI;
 input [2*SHARES-1 : 0] _YxDI;
 input [SHARES*(SHARES-1)-1 : 0] _ZxDI;
@@ -136,15 +136,15 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
 
     // Remask multiplication results from different domains
     // process x_times_b_register_p
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-        if (~RstxBI) begin // asynchronous reset (active low)
-            X_times_B_remaskedxDP[0] <= 2'b00;
-            X_times_B_remaskedxDP[1] <= 2'b00;
-        end
-        else begin // rising clock edge
+    always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     X_times_B_remaskedxDP[0] <= 2'b00;
+        //     X_times_B_remaskedxDP[1] <= 2'b00;
+        // end
+        // else begin // rising clock edge
             X_times_B_remaskedxDP[0] <= X_times_B_remaskedxDN[0];
             X_times_B_remaskedxDP[1] <= X_times_B_remaskedxDN[1];
-        end
+        // end
     end
 
     // Multipliers
@@ -207,7 +207,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
 
     shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_XxDI),
         ._YxDI(_BxDI),
         ._ZxDI(_ZxDI),
@@ -224,37 +224,37 @@ end
 // General stuff used for all variants:
 // Use pipelining --> X needs to be registered
 if (PIPELINED == 1) begin
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
     // always @(posedge ClkxCI) begin : proc_
         integer k;
-        if (~RstxBI) begin // asynchronous reset (active low)
-            for (k = 0; k < SHARES; k = k + 1) begin
-                XxDP[k] = 2'b00;
-                YxDP[k] = 2'b00;
-            end
-        end
-        else begin // rising clock edge
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     for (k = 0; k < SHARES; k = k + 1) begin
+        //         XxDP[k] = 2'b00;
+        //         YxDP[k] = 2'b00;
+        //     end
+        // end
+        // else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 XxDP[k] = XxDI[k];
                 YxDP[k] = YxDI[k];
             end
-        end
+        // end
     end
 end
 
 // Blinding register process
-always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
     integer k;
-    if (~RstxBI) begin // asynchronous reset (active low)
-        for (k = 0; k < SHARES; k = k + 1) begin
-            BlindedYxDP[k] <= 2'b00;
-        end
-    end
-    else begin // rising clock edge
+    // if (~RstxBI) begin // asynchronous reset (active low)
+    //     for (k = 0; k < SHARES; k = k + 1) begin
+    //         BlindedYxDP[k] <= 2'b00;
+    //     end
+    // end
+    // else begin // rising clock edge
         for (k = 0; k < SHARES; k = k + 1) begin
             BlindedYxDP[k] <= BlindedYxDN[k];
         end
-    end
+    // end
 end
 
 

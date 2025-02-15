@@ -6,7 +6,7 @@ module inverter #(
     parameter SHARES = 2
 ) (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     // masked input
     _XxDI,
     // Fresh masks
@@ -24,7 +24,7 @@ module inverter #(
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
@@ -93,24 +93,24 @@ end
 
 // Masked Inverter for 5 staged Sbox
 if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
+    always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
         integer k;
-        if (~RstxBI) begin // asynchronous reset (active low)
-            // iterate over shares
-            for (k = 0; k < SHARES; k = k + 1) begin
-                AxDP[k] = 2'b00;
-                BxDP[k] = 2'b00;
-                CxDP[k] = 2'b00;
-            end
-        end
-        else begin // rising clock edge
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     // iterate over shares
+        //     for (k = 0; k < SHARES; k = k + 1) begin
+        //         AxDP[k] = 2'b00;
+        //         BxDP[k] = 2'b00;
+        //         CxDP[k] = 2'b00;
+        //     end
+        // end
+        // else begin // rising clock edge
             // iterate over shares
             for (k = 0; k < SHARES; k = k + 1) begin
                 AxDP[k] = A[k];
                 BxDP[k] = B[k];
                 CxDP[k] = CxD[k];
             end
-        end
+        // end
     end
 
     for (i = 0; i < SHARES; i = i + 1) begin
@@ -123,7 +123,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
     a_sqscmul_b
     (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_A),
         ._YxDI(_B),
         ._ZxDI(_Zmul1xDI),
@@ -134,7 +134,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     a_mul_e (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_AxDP),
         ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul2xDI),
@@ -145,7 +145,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     b_mul_e (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_BxDP),
         ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul3xDI),

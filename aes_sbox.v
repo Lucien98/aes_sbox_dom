@@ -5,7 +5,7 @@ module aes_sbox #(
     parameter SHARES = 2
 ) (
     ClkxCI,
-    RstxBI,
+    // RstxBI,
     // Inputs: X and random data
     _XxDI,
     // Fresh masks
@@ -28,7 +28,7 @@ localparam blind_n_rnd = _blind_nrnd(SHARES);
 
 
 input ClkxCI;
-input RstxBI;
+// input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
 input [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
 input [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
@@ -138,33 +138,33 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Add pipelining stage after linear mapping at input,
     // between Stage 1 and 2
     integer k;
-    always @(posedge ClkxCI or negedge RstxBI) begin
+    always @(posedge ClkxCI /*or negedge RstxBI*/) begin
         // process pipeline_lin_map_p
-        if (~RstxBI) begin              // asynchronous reset (active low)
-            for (k = 0; k < SHARES; k = k + 1)
-            mappedxDP[k] <= 8'b0000;
-            end //k
-        else begin  // rising clock edge
+        // if (~RstxBI) begin              // asynchronous reset (active low)
+        //     for (k = 0; k < SHARES; k = k + 1)
+        //     mappedxDP[k] <= 8'b0000;
+        //     end //k
+        // else begin  // rising clock edge
             for (k = 0; k < SHARES; k = k + 1)
             mappedxDP[k] <= mappedxD[k];
-            end //k
+        // end //k
     end
 
     // Pipeline for Y0 and Y1
     // process pipeline_y0y1_p
-    always @(posedge ClkxCI or negedge RstxBI) begin : proc_
-        if (~RstxBI) begin // asynchronous reset (active low)
-            // per share
-            for (k = 0; k < SHARES; k = k + 1) begin
-                Y0_0xDP[k] = 4'b0000;
-                Y0_1xDP[k] = 4'b0000;
-                Y0_2xDP[k] = 4'b0000;
-                Y1_0xDP[k] = 4'b0000;
-                Y1_1xDP[k] = 4'b0000;
-                Y1_2xDP[k] = 4'b0000;
-            end
-        end
-        else begin // rising clock edge
+    always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
+        // if (~RstxBI) begin // asynchronous reset (active low)
+        //     // per share
+        //     for (k = 0; k < SHARES; k = k + 1) begin
+        //         Y0_0xDP[k] = 4'b0000;
+        //         Y0_1xDP[k] = 4'b0000;
+        //         Y0_2xDP[k] = 4'b0000;
+        //         Y1_0xDP[k] = 4'b0000;
+        //         Y1_1xDP[k] = 4'b0000;
+        //         Y1_2xDP[k] = 4'b0000;
+        //     end
+        // end
+        // else begin // rising clock edge
             for (k = 0; k < SHARES; k = k + 1) begin
                 
                 Y0_2xDP[k] = Y0_1xDP[k];
@@ -175,7 +175,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
                 Y1_0xDP[k] = Y1xD[k];
                 // Y0xorY12xDP[k] = Y0xorY12xD[k];
             end
-        end
+        // end
     end
 
     // Generate instances per share...
@@ -218,7 +218,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_Y1xD),
         ._YxDI(_Y0xD),
         ._ZxDI(_Zmul1xDI),
@@ -229,7 +229,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     inverter #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))
     inverter_gf24 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_InverterInxD),
         ._Zmul1xDI(_Zinv1xDI),
         ._Zmul2xDI(_Zinv2xDI),
@@ -244,7 +244,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_msb (
 		.ClkxCI(ClkxCI),
-		.RstxBI(RstxBI),
+		// .RstxBI(RstxBI),
 		._XxDI(_InverterOutxD), 
 		._YxDI(_Y0_2xDP), 
 		._ZxDI(_Zmul2xDI), 
@@ -255,7 +255,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_lsb (
 		.ClkxCI(ClkxCI),
-		.RstxBI(RstxBI),
+		// .RstxBI(RstxBI),
 		._XxDI(_InverterOutxD), 
 		._YxDI(_Y1_2xDP), 
 		._ZxDI(_Zmul3xDI), 

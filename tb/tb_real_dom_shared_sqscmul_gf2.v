@@ -10,7 +10,7 @@ localparam SHARES=2;
 
 // General signals
 reg ClkxCI;
-reg RstxBI;
+// reg RstxBI;
 
 reg [1:0] XxDI [SHARES-1 : 0];
 reg [1:0] YxDI [SHARES-1 : 0];
@@ -41,7 +41,7 @@ end
 
 real_dom_shared_sqscmul_gf2 #(.PIPELINED(1), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES)) inst_real_dom_shared_sqscmul_gf2(
 	.ClkxCI(ClkxCI),
-	.RstxBI(RstxBI),
+	// .RstxBI(RstxBI),
 	._XxDI(_XxDI), 
 	._YxDI(_YxDI), 
 	._ZxDI(_ZxDI), 
@@ -53,14 +53,14 @@ always@(*) #Td ClkxCI<=~ClkxCI;
 
 initial begin
 	ClkxCI = 0;
-	RstxBI = 0;
+	// RstxBI = 0;
 
 	for (integer k = 0; k < SHARES; k=k+1) begin
 		XxDI[k] <= 0;
 		YxDI[k] <= 0;
 	end
 	#T;
-	RstxBI = 1;
+	// RstxBI = 1;
 	#T;
 
 	//alternative version

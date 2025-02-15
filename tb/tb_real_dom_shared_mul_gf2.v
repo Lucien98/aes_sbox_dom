@@ -10,7 +10,7 @@ module tb_real_dom_shared_mul_gf2 ();
 
     // General signals
 	reg ClkxCI;
-	reg RstxBI;
+	// reg RstxBI;
 
 	reg [1:0] XxDI [SHARES-1 : 0];
 	reg [1:0] YxDI [SHARES-1 : 0];
@@ -40,7 +40,7 @@ module tb_real_dom_shared_mul_gf2 ();
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(FIRST_ORDER_OPTIMIZATION), .SHARES(SHARES))
     inst_real_dom_shared_mul_gf2 (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_XxDI),
         ._YxDI(_YxDI),
         ._ZxDI(_ZxDI),
@@ -53,13 +53,13 @@ module tb_real_dom_shared_mul_gf2 ();
 
 	initial begin
         ClkxCI = 0;
-		RstxBI = 0;
+		// RstxBI = 0;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] <= 0;
 			YxDI[k] <= 0;
 		end
 		#T;
-		RstxBI = 1;
+		// RstxBI = 1;
 		#T;
 
         //alternative version

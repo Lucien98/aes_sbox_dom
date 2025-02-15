@@ -11,7 +11,7 @@ module tb_inverter ();
 
     // General signals
 	reg ClkxCI;
-	reg RstxBI;
+	// reg RstxBI;
 
     reg [3:0] XxDI [SHARES-1 : 0];
     wire [3:0] QxDO [SHARES-1 : 0];
@@ -52,7 +52,7 @@ module tb_inverter ();
     inverter #(.VARIANT(VARIANT), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(EIGHT_STAGED_SBOX), .SHARES(SHARES))
     inst_inverter (
         .ClkxCI(ClkxCI),
-        .RstxBI(RstxBI),
+        // .RstxBI(RstxBI),
         ._XxDI(_XxDI),
         ._Zmul1xDI(_Zmul1xDI),
         ._Zmul2xDI(_Zmul2xDI),
@@ -68,12 +68,12 @@ module tb_inverter ();
 
 	initial begin
         ClkxCI = 0;
-		RstxBI = 0;
+		// RstxBI = 0;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] <= 0;
 		end
 		#T;
-		RstxBI = 1;
+		// RstxBI = 1;
 		#T;
         
         for (integer k = 0; k < 100; k = k + 1) begin 

@@ -18,7 +18,9 @@ module aes_sbox #(
     // Blinding values for Inverter (for 5 stage Sbox only)
     _Binv1xDI,
     _Binv2xDI,
+`ifndef RAND_OPT
     _Binv3xDI,
+`endif
     // Output Q = SBOX(X)
     _QxDO
 );
@@ -38,7 +40,9 @@ input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
 input [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
 input [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
+`ifndef RAND_OPT
 input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
+`endif
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [7:0] XxDI [SHARES-1 : 0];
@@ -236,7 +240,9 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._Zmul3xDI(_Zinv3xDI),
         ._Bmul1xDI(_Binv1xDI),
         ._Bmul2xDI(_Binv2xDI),
+`ifndef RAND_OPT
         ._Bmul3xDI(_Binv3xDI),
+`endif
         ._QxDO(_InverterOutxD)
     );
 

@@ -15,7 +15,9 @@ module inverter #(
     _Zmul3xDI,
     _Bmul1xDI,
     _Bmul2xDI,
+`ifndef RAND_OPT
     _Bmul3xDI,
+`endif
     // Outputs
     _QxDO
 );
@@ -31,7 +33,9 @@ input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul1xDI;
 input [2*blind_n_rnd-1 : 0] _Bmul2xDI;
+`ifndef RAND_OPT
 input [2*blind_n_rnd-1 : 0] _Bmul3xDI;
+`endif
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];
@@ -131,6 +135,7 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         ._QxDO(_AsqscmulBxD)
     );
 
+`ifndef RAND_OPT
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     a_mul_e (
         .ClkxCI(ClkxCI),
@@ -152,6 +157,22 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         ._BxDI(_Bmul3xDI),
         ._QxDO(_BmulExD)
     );
+`else
+    real_dom_shared_mul_gf2_paired #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._YxDI(_AsqscmulBxD),
+        ._X1xDI(_AxDP),
+        ._X2xDI(_BxDP),
+        ._Z1xDI(_Zmul2xDI),
+        ._Z2xDI(_Zmul3xDI),
+        ._BxDI(_Bmul2xDI),
+        ._Q1xDO(_AmulExD),
+        ._Q2xDO(_BmulExD)
+    );
+`endif
+
 end
 
 

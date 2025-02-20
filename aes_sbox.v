@@ -1,3 +1,4 @@
+`define RAND_OPT
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
@@ -115,7 +116,7 @@ end
 
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
-    if (PIPELINED == 1 && EIGHT_STAGED == 0) begin
+    if (PIPELINED == 1 && 0) begin
         assign Y1xD[i][3] = mappedxDP[i][7];
         assign Y1xD[i][2] = mappedxDP[i][6];
         assign Y1xD[i][1] = mappedxDP[i][5];
@@ -185,7 +186,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
-        lin_map #(.MATRIX_SEL(1))
+        lin_map #(.MATRIX_SEL(2))
         input_mapping (
             .DataInxDI(XxDI[i]),
             .DataOutxDO(mappedxD[i])

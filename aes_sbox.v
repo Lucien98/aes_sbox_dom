@@ -1,3 +1,4 @@
+`define PINI
 `define RAND_OPT
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
@@ -33,7 +34,11 @@ localparam blind_n_rnd = _blind_nrnd(SHARES);
 input ClkxCI;
 // input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
+`ifndef PINI
 input [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
+`else
+input [4*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
+`endif
 input [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
 input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
@@ -85,6 +90,7 @@ wire [4*SHARES-1 : 0] _Y0_2xDP;
 reg [3:0] Y0_3xDP [SHARES-1:0];
 reg [3:0] Y0_4xDP [SHARES-1:0];
 reg [3:0] Y1_0xDP [SHARES-1:0];
+wire [4*SHARES-1:0] _Y1_0xDP;
 reg [3:0] Y1_1xDP [SHARES-1:0];
 reg [3:0] Y1_2xDP [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y1_2xDP;
@@ -107,6 +113,7 @@ for (i = 0; i < SHARES; i=i+1) begin
 
         // Used in shared_mul_gf4
         assign _Y0_2xDP[i*4+j] = Y0_2xDP[i][j];
+        assign _Y1_0xDP[i*4+j] = Y1_0xDP[i][j];
         assign _Y1_2xDP[i*4+j] = Y1_2xDP[i][j];
         assign InverseMSBxD[i][j] = _InverseMSBxD[i*4+j];
         assign InverseLSBxD[i][j] = _InverseLSBxD[i*4+j];
@@ -186,7 +193,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
-        lin_map #(.MATRIX_SEL(2))
+        lin_map #(.MATRIX_SEL(1))
         input_mapping (
             .DataInxDI(XxDI[i]),
             .DataOutxDO(mappedxD[i])
@@ -220,6 +227,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 
     // Single instances:
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
+
+`ifndef PINI
     shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
@@ -229,6 +238,19 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._ZxDI(_Zmul1xDI),
         ._QxDO(_Y0sqscmulY1xD)
     );
+`else
+    shared_hpc3_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._XxDI(_Y1xD),
+        ._XxDI_prev(_Y1_0xDP),
+        ._YxDI(_Y0xD),
+        ._ZxDI(_Zmul1xDI[0 +: 2*SHARES*(SHARES-1)]),
+        ._RxDI(_Zmul1xDI[2*SHARES*(SHARES-1) +: 2*SHARES*(SHARES-1)]),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+`endif 
 
     // Inverter in GF2^4
     inverter #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))

@@ -6,3 +6,4 @@ else _blind_nrnd = d;
 end
 endfunction
 `define RAND_OPT
+`define PINI

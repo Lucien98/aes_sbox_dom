@@ -52,7 +52,7 @@ module tb_real_dom_shared_mul_gf2 ();
 	always@(*) #Td ClkxCI<=~ClkxCI;
 
 	initial begin
-        ClkxCI = 0;
+        ClkxCI = 1;
 		// RstxBI = 0;
         for (integer k = 0; k < SHARES; k=k+1) begin
 			XxDI[k] <= 0;

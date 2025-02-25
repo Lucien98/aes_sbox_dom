@@ -1,5 +1,6 @@
-`define PINI
+// `define PINI
 `define RAND_OPT
+`define FV
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
@@ -52,7 +53,11 @@ input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [7:0] XxDI [SHARES-1 : 0];
+`ifndef FV
 wire [7:0] QxDO [SHARES-1 : 0];
+`else
+reg [7:0] QxDO [SHARES-1 : 0];
+`endif
 
 genvar i;
 genvar j;
@@ -123,26 +128,25 @@ end
 
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
-    if (PIPELINED == 1 && 0) begin
-        assign Y1xD[i][3] = mappedxDP[i][7];
-        assign Y1xD[i][2] = mappedxDP[i][6];
-        assign Y1xD[i][1] = mappedxDP[i][5];
-        assign Y1xD[i][0] = mappedxDP[i][4];
-        assign Y0xD[i][3] = mappedxDP[i][3];
-        assign Y0xD[i][2] = mappedxDP[i][2];
-        assign Y0xD[i][1] = mappedxDP[i][1];
-        assign Y0xD[i][0] = mappedxDP[i][0];
-    end
-    else begin
-        assign Y1xD[i][3] = mappedxD[i][7];
-        assign Y1xD[i][2] = mappedxD[i][6];
-        assign Y1xD[i][1] = mappedxD[i][5];
-        assign Y1xD[i][0] = mappedxD[i][4];
-        assign Y0xD[i][3] = mappedxD[i][3];
-        assign Y0xD[i][2] = mappedxD[i][2];
-        assign Y0xD[i][1] = mappedxD[i][1];
-        assign Y0xD[i][0] = mappedxD[i][0];
-    end
+`ifndef PINI
+    assign Y1xD[i][3] = mappedxDP[i][7];
+    assign Y1xD[i][2] = mappedxDP[i][6];
+    assign Y1xD[i][1] = mappedxDP[i][5];
+    assign Y1xD[i][0] = mappedxDP[i][4];
+    assign Y0xD[i][3] = mappedxDP[i][3];
+    assign Y0xD[i][2] = mappedxDP[i][2];
+    assign Y0xD[i][1] = mappedxDP[i][1];
+    assign Y0xD[i][0] = mappedxDP[i][0];
+`else
+    assign Y1xD[i][3] = mappedxD[i][7];
+    assign Y1xD[i][2] = mappedxD[i][6];
+    assign Y1xD[i][1] = mappedxD[i][5];
+    assign Y1xD[i][0] = mappedxD[i][4];
+    assign Y0xD[i][3] = mappedxD[i][3];
+    assign Y0xD[i][2] = mappedxD[i][2];
+    assign Y0xD[i][1] = mappedxD[i][1];
+    assign Y0xD[i][0] = mappedxD[i][0];
+`endif
 end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
@@ -188,6 +192,18 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
                 // Y0xorY12xDP[k] = Y0xorY12xD[k];
             end
         // end
+`ifdef FV
+        // Output
+        for (k = 0; k < SHARES; k = k + 1) begin
+            if (k > 0) begin
+                QxDO[k] = InvMappedxD[k];
+            end
+            else begin // Add "b" only once
+                // assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
+                QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
+            end
+        end
+`endif
     end
 
     // Generate instances per share...
@@ -214,7 +230,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             .DataOutxDO(InvMappedxD[i])
         );
     end
-
+`ifndef FV
     // Output
     for (i = 0; i < SHARES; i = i + 1) begin
         if (i > 0) begin
@@ -224,6 +240,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
             assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
         end
     end
+`endif
 
     // Single instances:
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)

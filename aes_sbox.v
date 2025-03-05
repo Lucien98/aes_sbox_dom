@@ -83,8 +83,11 @@ assign _Bgf2_5xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
 `endif
 
 wire [7:0] XxDI [SHARES-1 : 0];
+`ifdef FV
 reg [7:0] QxDO [SHARES-1 : 0];
-
+`else 
+wire [7:0] QxDO [SHARES-1 : 0];
+`endif
 genvar i;
 genvar j;
 for (i = 0; i < SHARES; i=i+1) begin
@@ -190,7 +193,18 @@ switch_encoding_out (
     .shbit(_mappedxD_bit)
 );
 
-
+`ifndef FV
+// Output
+for (i = 0; i < SHARES; i = i + 1) begin
+    if (i > 0) begin
+        assign QxDO[i] = InvMappedxD[i];
+    end
+    else begin // Add "b" only once
+        // assign QxDO[0] = InvMappedxD[0];// ^ 8'b01100011;
+        assign QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
+    end
+end
+`endif
 
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
@@ -250,6 +264,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
                 Y1_0xDP[k] = Y1xD[k];
             end
         // end
+// store the output of S-box for formal verification
+`ifdef FV
         // Output
         for (k = 0; k < SHARES; k = k + 1) begin
             if (k > 0) begin
@@ -260,6 +276,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
                 QxDO[0] = InvMappedxD[0] ^ 8'b01100011;
             end
         end
+`endif
 
     end
 

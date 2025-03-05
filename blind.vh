@@ -6,3 +6,5 @@ else _blind_nrnd = d;
 end
 endfunction
 `define RAND_OPT
+// do not define FV when the sbox is used as a module
+//`define FV

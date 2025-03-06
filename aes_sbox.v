@@ -1,6 +1,7 @@
 // `define PINI
 `define RAND_OPT
 `define FV
+`define NOIA
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
@@ -209,7 +210,11 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
+`ifndef NOIA
         lin_map #(.MATRIX_SEL(1))
+`else
+        lin_map #(.MATRIX_SEL(2))
+`endif
         input_mapping (
             .DataInxDI(XxDI[i]),
             .DataOutxDO(mappedxD[i])

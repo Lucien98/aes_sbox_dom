@@ -4,8 +4,8 @@
 
 /* You can define only one of PINI and NOIA if using the sbox as 
 part of masked aes for the correctness of AES*/
-//`define PINI
-`define NOIA
+`define PINI
+// `define NOIA
 
 function integer _blind_nrnd(input integer d);
 begin

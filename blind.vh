@@ -7,3 +7,5 @@ end
 endfunction
 `define RAND_OPT
 `define PINI
+// `define NOIA
+// `define FV

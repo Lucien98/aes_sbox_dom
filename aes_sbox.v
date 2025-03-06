@@ -1,7 +1,4 @@
-// `define PINI
 `define RAND_OPT
-`define FV
-`define NOIA
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
@@ -127,9 +124,10 @@ for (i = 0; i < SHARES; i=i+1) begin
 end
 
 
+
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
-`ifndef PINI
+`ifdef IAINREG
     assign Y1xD[i][3] = mappedxDP[i][7];
     assign Y1xD[i][2] = mappedxDP[i][6];
     assign Y1xD[i][1] = mappedxDP[i][5];

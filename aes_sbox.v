@@ -16,17 +16,16 @@ module aes_sbox #(
 );
 
 `include "blind.vh"
-function integer _n_rndz(input integer d);
-begin
-if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
-else if (d==2) _n_rndz = 11;
-else _n_rndz = 11;
-end
-endfunction
+// function integer _n_rndz(input integer d);
+// begin
+// if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
+// else if (d==2) _n_rndz = 11;
+// else _n_rndz = 11;
+// end
+// endfunction
 
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam n_random_z = SHARES*(SHARES-1);
-localparam coeff = _n_rndz(SHARES);
 
 input ClkxCI;
 // input RstxBI;
@@ -40,7 +39,7 @@ input [2*9*blind_n_rnd-1:0] RandomB;
 `endif
 output [8*SHARES-1 : 0] _QxDO;
 
-wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
+wire [(coeff-9)*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI; // for y1 * y0
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI; // for 0 * y1
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 wire [4*blind_n_rnd-1 : 0] _Bgf4_1xDI; // for mul_gf4 in the second stage
@@ -61,9 +60,9 @@ wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI; // ...
 wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI; // ...
 `endif
 
-assign _Zmul1xDI = RandomZ[5*n_random_z+:2*n_random_z];
+assign _Zmul1xDI = RandomZ[9*n_random_z+:(coeff-9)*n_random_z];
 assign _Zmul2xDI = RandomZ[7*n_random_z+:2*n_random_z];
-assign _Zmul3xDI = RandomZ[(coeff-2)*n_random_z+:2*n_random_z];
+assign _Zmul3xDI = RandomZ[5*n_random_z+:2*n_random_z];
 assign _Zgf2_1xDI = RandomZ[0*n_random_z+:n_random_z];
 assign _Zgf2_2xDI = RandomZ[1*n_random_z+:n_random_z];
 assign _Zgf2_3xDI = RandomZ[2*n_random_z+:n_random_z];
@@ -208,26 +207,25 @@ end
 
 // General: Define aliases
 for (i = 0; i < SHARES; i = i + 1) begin
-    if (PIPELINED == 1 && 0) begin
-        assign Y1xD[i][3] = mappedxDP[i][7];
-        assign Y1xD[i][2] = mappedxDP[i][6];
-        assign Y1xD[i][1] = mappedxDP[i][5];
-        assign Y1xD[i][0] = mappedxDP[i][4];
-        assign Y0xD[i][3] = mappedxDP[i][3];
-        assign Y0xD[i][2] = mappedxDP[i][2];
-        assign Y0xD[i][1] = mappedxDP[i][1];
-        assign Y0xD[i][0] = mappedxDP[i][0];
-    end
-    else begin
-        assign Y1xD[i][3] = mappedxD[i][7];
-        assign Y1xD[i][2] = mappedxD[i][6];
-        assign Y1xD[i][1] = mappedxD[i][5];
-        assign Y1xD[i][0] = mappedxD[i][4];
-        assign Y0xD[i][3] = mappedxD[i][3];
-        assign Y0xD[i][2] = mappedxD[i][2];
-        assign Y0xD[i][1] = mappedxD[i][1];
-        assign Y0xD[i][0] = mappedxD[i][0];
-    end
+`ifndef PINI
+    assign Y1xD[i][3] = mappedxDP[i][7];
+    assign Y1xD[i][2] = mappedxDP[i][6];
+    assign Y1xD[i][1] = mappedxDP[i][5];
+    assign Y1xD[i][0] = mappedxDP[i][4];
+    assign Y0xD[i][3] = mappedxDP[i][3];
+    assign Y0xD[i][2] = mappedxDP[i][2];
+    assign Y0xD[i][1] = mappedxDP[i][1];
+    assign Y0xD[i][0] = mappedxDP[i][0];
+`else
+    assign Y1xD[i][3] = mappedxD[i][7];
+    assign Y1xD[i][2] = mappedxD[i][6];
+    assign Y1xD[i][1] = mappedxD[i][5];
+    assign Y1xD[i][0] = mappedxD[i][4];
+    assign Y0xD[i][3] = mappedxD[i][3];
+    assign Y0xD[i][2] = mappedxD[i][2];
+    assign Y0xD[i][1] = mappedxD[i][1];
+    assign Y0xD[i][0] = mappedxD[i][0];
+`endif
 end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
@@ -283,7 +281,11 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
+`ifndef NOIA
+        lin_map #(.MATRIX_SEL(1))
+`else
         lin_map #(.MATRIX_SEL(2))
+`endif
         input_mapping (
             .DataInxDI(XxDI[i]),
             .DataOutxDO(mappedxD[i])
@@ -302,6 +304,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 
     // Single instances:
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
+`ifndef PINI
     shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
@@ -312,6 +315,19 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._ZxDI(_Zmul1xDI),
         ._QxDO(_Y0sqscmulY1xD)
     );
+`else
+    shared_hpc3_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._XxDI(_Y1xD),
+        ._XxDI_prev(_Y1_0xDP),
+        ._YxDI(_Y0xD),
+        ._ZxDI(_Zmul1xDI[0 +: 2*SHARES*(SHARES-1)]),
+        ._RxDI(_Zmul1xDI[2*SHARES*(SHARES-1) +: 2*SHARES*(SHARES-1)]),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+`endif 
 
     // Inverter in GF2^4
     real_dom_sqscmul_gf2_wraper #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))

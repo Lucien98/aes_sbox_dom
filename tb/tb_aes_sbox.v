@@ -1,14 +1,5 @@
 `timescale 1ns/1ps
 module tb_aes_sbox ();
-    function integer _n_rndz(input integer d);
-    begin
-    if (d==1) _n_rndz = 1; // Hack to avoid 0-width signals.
-    else if (d==2) _n_rndz = 11;
-    else _n_rndz = 11;
-    end
-    endfunction
-    localparam coeff = _n_rndz(SHARES);
-
     localparam T=2.0;
 	localparam Td = T/2.0;
 

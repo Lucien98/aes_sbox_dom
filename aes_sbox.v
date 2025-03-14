@@ -15,18 +15,17 @@ module aes_sbox #(
 );
 
 `include "blind.vh"
-
+// generate
+`define OPTO1O2
 `ifndef OPTO1O2
     `define NEED_EXTRA_BGF2
 `else
-    generate
         if (SHARES > 3) begin
-            localparam bcoeff = 8;
+            // localparam bcoeff = 8;
             `define NEED_EXTRA_BGF2
         end else begin
             localparam bcoeff = 6;
         end
-    endgenerate
 `endif
 
 `ifdef NEED_EXTRA_BGF2
@@ -37,6 +36,7 @@ module aes_sbox #(
     `endif
     `undef NEED_EXTRA_BGF2  // 避免宏污染
 `endif
+// endgenerate
 
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam n_random_z = SHARES*(SHARES-1);
@@ -281,12 +281,12 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     // Single instances:
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
 `ifndef PINI
-    shared_sqscmul_gf4_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
         ._YxDI(_Y1xD),
         ._XxDI(_Y0xD),
-        ._ZxDI({_Zmul1xDI,_Zmul1xDI}),
+        ._ZxDI({_Zmul1xDI,_Bgf4_1xDI}),
         ._QxDO(_Y0sqscmulY1xD)
     );
 `else
@@ -317,10 +317,33 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         .ClkxCI(ClkxCI),
         ._XxDI(_A),
         ._YxDI(_B),
-        ._ZxDI({_Zgf2_1xDI,_Zgf2_1xDI}),
+        ._ZxDI({_Zgf2_1xDI,_Bgf2_1xDI}),
         ._QxDO(_InverterOutxD)
     );
 
+
+`ifdef OPTO1O2
+
+    // Multiply Inv and Y0 (GF 2^4)
+    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    mult_msb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._XxDI(_Y0_0xDP),
+        ._ZxDI(_Zmul2xDI), 
+        ._QxDO(_InverseMSBxD)
+    );
+
+    // Multiply Y1 and Inv (GF2^4)
+    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._XxDI(_Y1_0xDP),
+        ._ZxDI(_Zmul3xDI), 
+        ._QxDO(_InverseLSBxD)
+    );
+`else
 
 `ifndef RAND_OPT
     // Multiply Inv and Y0 (GF 2^4)
@@ -359,6 +382,47 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._Q1xDO(_InverseMSBxD)
     );
 `endif
+`endif
+
+`ifdef OPTO1O2
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_0 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBLSB),
+        ._ZxDI(_Zgf2_2xDI),
+        ._QxDO(_InvOutLSBLSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_1 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBMSB),
+        ._ZxDI(_Zgf2_3xDI),
+        ._QxDO(_InvOutLSBMSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_2 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBLSB),
+        ._ZxDI(_Zgf2_4xDI),
+        ._QxDO(_InvOutMSBLSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_3 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBMSB),
+        ._ZxDI(_Zgf2_5xDI),
+        ._QxDO(_InvOutMSBMSB)
+    );
+
+
+`else
 
 `ifdef RAND_OPT
     real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
@@ -421,6 +485,7 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._QxDO(_InvOutMSBMSB)
     );
 
+`endif
 `endif
 
 

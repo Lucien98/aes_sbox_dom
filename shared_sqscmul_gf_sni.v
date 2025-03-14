@@ -1,50 +1,49 @@
-module shared_sqscmul_gf4_sni
+module shared_sqscmul_gf_sni
 #
 (
     parameter PIPELINED = 1,
-    parameter SHARES = 2
+    parameter SHARES = 2,
+    parameter N = 4
 )
 (
     ClkxCI,
-    // RstxBI,
     _XxDI,
     _YxDI,
     _ZxDI,
     _QxDO
 );
 input ClkxCI;
-// input RstxBI;
 
 
-input [4*SHARES-1 : 0] _XxDI;
-input [4*SHARES-1 : 0] _YxDI;
-input [4*SHARES*(SHARES-1)-1 : 0] _ZxDI;
-output [4*SHARES-1 : 0] _QxDO;
+input [N*SHARES-1 : 0] _XxDI;
+input [N*SHARES-1 : 0] _YxDI;
+input [N*SHARES*(SHARES-1)-1 : 0] _ZxDI;
+output [N*SHARES-1 : 0] _QxDO;
 
-wire [3:0] XxDI [SHARES-1 : 0];
-wire [3:0] YxDI [SHARES-1 : 0];
-wire [3:0] Z1xDI [(SHARES*(SHARES-1)/2)-1 : 0];
-wire [3:0] Z2xDI [(SHARES*(SHARES-1)/2)-1 : 0];
-wire [3:0] QxDO [SHARES-1 : 0];
+wire [N-1:0] XxDI [SHARES-1 : 0];
+wire [N-1:0] YxDI [SHARES-1 : 0];
+wire [N-1:0] Z1xDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [N-1:0] Z2xDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [N-1:0] QxDO [SHARES-1 : 0];
 
 genvar i;
 genvar j;
 for (i = 0; i < SHARES; i=i+1) begin
-    for (j = 0; j < 4; j=j+1) begin
-        assign XxDI[i][j] = _XxDI[i*4+j];
-        assign YxDI[i][j] = _YxDI[i*4+j];
-        assign _QxDO[i*4+j] = QxDO[i][(j+2)%4];
+    for (j = 0; j < N; j=j+1) begin
+        assign XxDI[i][j] = _XxDI[i*N+j];
+        assign YxDI[i][j] = _YxDI[i*N+j];
+        assign _QxDO[i*N+j] = QxDO[i][(j+N/2)%N];
     end
 end
 
 for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
-    for (j = 0; j < 4; j=j+1) begin
-        assign Z1xDI[i][j] = _ZxDI[i*4+j];
-        assign Z2xDI[i][j] = _ZxDI[2*SHARES*(SHARES-1) + i*4+j];
+    for (j = 0; j < N; j=j+1) begin
+        assign Z1xDI[i][j] = _ZxDI[i*N+j];
+        assign Z2xDI[i][j] = _ZxDI[N/2*SHARES*(SHARES-1) + i*N+j];
     end
 end
 
-reg [3:0] Share0 [SHARES*SHARES-1:0];
+reg [N-1:0] Share0 [SHARES*SHARES-1:0];
 if (SHARES == 3) begin
     always @(posedge ClkxCI) begin : proc_share0
         integer k;
@@ -65,19 +64,19 @@ end
 
 
 // Intermediates
-wire [3:0] Xi_mul_Yj [SHARES*SHARES-1:0];
+wire [N-1:0] Xi_mul_Yj [SHARES*SHARES-1:0];
 
 // Synchronization FF's
-reg [3:0] FFxDN     [SHARES*SHARES-1:0];
-reg [3:0] FFxDP     [SHARES*SHARES-1:0];
+reg [N-1:0] FFxDN     [SHARES*SHARES-1:0];
+reg [N-1:0] FFxDP     [SHARES*SHARES-1:0];
 
-wire [3:0] Y0xorY1xD [SHARES-1 : 0];
-wire [3:0] Y0xorY12xD [SHARES-1 : 0]; 
+wire [N-1:0] Y0xorY1xD [SHARES-1 : 0];
+wire [N-1:0] Y0xorY12xD [SHARES-1 : 0]; 
 
 
 for (i = 0; i < SHARES; i=i+1) begin
     for (j = 0; j < SHARES; j=j+1) begin
-        gf2_mul #(.N(4)) inst_gf4_mul(
+        gf2_mul #(.N(N)) inst_gf4_mul(
             .AxDI(XxDI[i]),
             .BxDI(YxDI[j]),
             .QxDO(Xi_mul_Yj[SHARES*i + j])
@@ -87,9 +86,15 @@ end
 
 for (i = 0; i < SHARES; i=i+1) begin
     assign Y0xorY1xD[i] = XxDI[i] ^ YxDI[i];
+if (N==4)
     square_scaler square_scaler_inst (
         .DataInxDI(Y0xorY1xD[i]),
         .DataOutxDO(Y0xorY12xD[i])
+    );
+else
+    scale scaler_inst (
+        .a(Y0xorY1xD[i]),
+        .q(Y0xorY12xD[i])
     );
 end
 
@@ -99,26 +104,18 @@ end
 // outputs: 
 
 // async
-always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
+always @(posedge ClkxCI) begin : proc_
     integer k;
     integer l;
-    // if(~RstxBI) begin
-    //     for (k = 0; k < SHARES; k=k+1) begin
-    //         for (l = 0; l < SHARES; l=l+1) begin
-    //             FFxDP[SHARES*k + l] <= 4'b0000; 
-    //         end
-    //     end
-    // end else begin
-        for (k = 0; k < SHARES; k=k+1) begin
-            for (l = 0; l < SHARES; l=l+1) begin
-                FFxDP[SHARES*k + l] <= FFxDN[SHARES*k + l];
-            end
+    for (k = 0; k < SHARES; k=k+1) begin
+        for (l = 0; l < SHARES; l=l+1) begin
+            FFxDP[SHARES*k + l] <= FFxDN[SHARES*k + l];
         end
-    // end
+    end
 end
 
 
-reg [3:0] result [SHARES-1:0];
+reg [N-1:0] result [SHARES-1:0];
 for (i = 0; i < SHARES; i=i+1) begin
     assign QxDO[i] = result[i];
 end
@@ -135,7 +132,7 @@ if (PIPELINED == 1) begin
     integer l;
     always @(*) begin
         for (k = 0; k < SHARES; k=k+1) begin
-            result[k] = 4'b0000;
+            result[k] = 0;
             for (l = 0; l < SHARES; l=l+1) begin
                 if (k==l) begin
                     FFxDN[SHARES*k + l] = Xi_mul_Yj[SHARES*k + l] ^ Y0xorY12xD[k] ^ Share0[SHARES*k + l];             // domain term

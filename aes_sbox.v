@@ -327,9 +327,17 @@ end
 
 `ifndef OPTO1O2
     /*0: DOM-dep, 1: SNI*/
-    localparam stage2gf2_type = 0;
+    `ifndef RAND_OPT
+        localparam stage2gf2_type = 0;
+    `else
+        localparam stage2gf2_type = 2; 
+    `endif
 `else 
-    localparam stage2gf2_type = SHARES <= 3 ? 1 : 0;
+    `ifndef RAND_OPT
+        localparam stage2gf2_type = SHARES <= 3 ? 1 : 0;
+    `else
+        localparam stage2gf2_type = SHARES <= 3 ? 1 : 2;
+    `endif
 `endif
 
     wire [2*SHARES-1 : 0] _A;
@@ -341,6 +349,19 @@ end
         ._A   (_A),
         ._B   (_B)
         );
+    wire [3:0] BxDI [blind_n_rnd-1 : 0];
+    wire [1:0] Bgf2_1 [SHARES-1 : 0];
+    wire [2*blind_n_rnd-1 : 0] _Bgf2_1;
+    for (i = 0; i < SHARES; i=i+1) begin
+        assign Bgf2_1[i] = BxDI[i][1:0];
+        for (j = 0; j < 4; j=j+1) begin
+            assign BxDI[i][j] = _Bgf4_1xDI[i*4+j];
+        end
+        for (j = 0; j < 2; j=j+1) begin
+            assign _Bgf2_1[i*2+j] = Bgf2_1[i][j];
+        end
+    end    
+
 
 if (stage2gf2_type == 0) begin
     real_dom_shared_sqscmul_gf2 # (.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
@@ -350,11 +371,11 @@ if (stage2gf2_type == 0) begin
         ._XxDI(_A),
         ._YxDI(_B),
         ._ZxDI(_Zgf2_1xDI),
-        ._BxDI(_Bgf2_1xDI),
+        ._BxDI(_Bgf2_1),
         ._QxDO(_InverterOutxD)
     );
 end
-else begin
+else if (stage2gf2_type == 1) begin
     shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES), .N(2))
     a_sqscmul_b
     (
@@ -450,6 +471,7 @@ if (stage2gf4_type == 0) begin
 
 end
 else if (stage2gf4_type == 1) begin
+    /* 
     real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
     mult_lsb (
         .ClkxCI(ClkxCI),
@@ -461,6 +483,22 @@ else if (stage2gf4_type == 1) begin
         ._BxDI(_Bgf4_1xDI),
         ._Q2xDO(_InverseLSBxD),
         ._Q1xDO(_InverseMSBxD)
+    );
+    */
+    
+    real_dom_shared_stage2 #(.PIPELINED(1),.SHARES(SHARES))
+    mult_stage2 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._X1xDI(_Y0_0xDP),
+        ._X2xDI(_Y1_0xDP),
+        ._Z1xDI(_Zmul2xDI), 
+        ._Z2xDI(_Zmul3xDI), 
+        ._ZxDI(_Zgf2_1xDI),
+        ._BxDI(_Bgf4_1xDI),
+        ._Q2xDO(_InverseLSBxD),
+        ._Q1xDO(_InverseMSBxD),
+        ._QxDO(_InverterOutxD)
     );
 
     real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))

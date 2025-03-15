@@ -1,0 +1,476 @@
+module real_dom_shared_stage2 #(
+    parameter PIPELINED = 1, // 1: yes, 0: no
+    parameter FIRST_ORDER_OPTIMIZATION = 1, // 1: yes, 0: no
+    parameter SHARES = 2
+) (
+    ClkxCI,
+    // RstxBI,
+    _X1xDI,
+    _X2xDI,
+    _YxDI,
+    _Z1xDI,
+    _Z2xDI,
+    _ZxDI,
+    _BxDI,
+    _Q1xDO,
+    _Q2xDO,
+    _QxDO
+);
+
+`include "blind.vh"
+localparam blind_n_rnd = _blind_nrnd(SHARES);
+////////////////// for two mul_gf4
+input ClkxCI;
+input [4*SHARES-1 : 0] _X1xDI;
+input [4*SHARES-1 : 0] _X2xDI;
+input [4*SHARES-1 : 0] _YxDI;
+input [2*SHARES*(SHARES-1)-1 : 0] _Z1xDI;
+input [2*SHARES*(SHARES-1)-1 : 0] _Z2xDI;
+input [4*blind_n_rnd-1 : 0] _BxDI;
+output [4*SHARES-1 : 0] _Q1xDO;
+output [4*SHARES-1 : 0] _Q2xDO;
+
+//////////////// for sqscmul_gf2
+output [2*SHARES-1 : 0] _QxDO;
+input [SHARES*(SHARES-1)-1 : 0] _ZxDI;
+wire [2*SHARES-1 : 0] _XxDI;
+wire [2*SHARES-1 : 0] _YxDI_low;
+wire [2*blind_n_rnd-1 : 0] _BxDI_low;
+
+
+//////////////// for two mul_gf4
+wire [3:0] X1xDI [SHARES-1 : 0];
+wire [3:0] X2xDI [SHARES-1 : 0];
+wire [3:0] YxDI [SHARES-1 : 0];
+wire [3:0] Z1xDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [3:0] Z2xDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [3:0] BxDI [blind_n_rnd-1 : 0];
+wire [3:0] Q1xDO [SHARES-1 : 0];
+wire [3:0] Q2xDO [SHARES-1 : 0];
+
+//////////////// for sqscmul_gf2
+wire [1:0] XxDI [SHARES-1 : 0];
+wire [1:0] YxDI_low [SHARES-1 : 0];
+wire [1:0] ZxDI [(SHARES*(SHARES-1)/2)-1 : 0];
+wire [1:0] BxDI_low [blind_n_rnd-1 : 0];
+wire [1:0] QxDO [SHARES-1 : 0];
+
+
+genvar i;
+genvar j;
+//////////////// for two mul_gf4
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 4; j=j+1) begin
+        assign X1xDI[i][j] = _X1xDI[i*4+j];
+        assign X2xDI[i][j] = _X2xDI[i*4+j];
+        assign YxDI[i][j] = _YxDI[i*4+j];
+        // assign BxDI[i][j] = _BxDI[i*4+j];
+        assign _Q1xDO[i*4+j] = Q1xDO[i][j];
+        assign _Q2xDO[i*4+j] = Q2xDO[i][j];
+    end
+end
+
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    for (i = 0; i < SHARES-1; i=i+1) begin
+        for (j = 0; j < 4; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*2+j];
+        end
+    end
+end
+else begin
+    for (i = 0; i < SHARES; i=i+1) begin
+        for (j = 0; j < 4; j=j+1) begin
+            assign BxDI[i][j] = _BxDI[i*4+j];
+        end
+    end    
+end
+
+
+for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
+    for (j = 0; j < 4; j=j+1) begin
+        assign Z1xDI[i][j] = _Z1xDI[i*4+j];
+        assign Z2xDI[i][j] = _Z2xDI[i*4+j];
+    end
+end
+// end for mul_gf4
+
+//////////////// for sqscmul_gf2
+for (i = 0; i < SHARES; i=i+1) begin
+    assign YxDI_low[i] = YxDI[i][1:0];
+    assign XxDI[i] = YxDI[i][3:2];
+    for (j = 0; j < 2; j=j+1) begin
+        assign _XxDI[i*2+j] = XxDI[i][j];
+        assign _YxDI_low[i*2+j] = YxDI_low[i][j];
+        assign _QxDO[i*2+j] = QxDO[i][1-j]; // 1-j: inverse
+    end
+end
+
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    for (i = 0; i < SHARES-1; i=i+1) begin
+        assign BxDI_low[i] = BxDI[i][1:0];
+    end
+end
+else begin
+    for (i = 0; i < SHARES; i=i+1) begin
+        assign BxDI_low[i] = BxDI[i][1:0];
+    end    
+end
+
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    for (i = 0; i < SHARES-1; i=i+1) begin
+        for (j = 0; j < 2; j=j+1) begin
+            assign _BxDI_low[2*i+j] = BxDI_low[i][j];
+        end
+    end
+end
+else begin
+    for (i = 0; i < SHARES; i=i+1) begin
+        for (j = 0; j < 2; j=j+1) begin
+            assign _BxDI_low[2*i+j] = BxDI_low[i][j];
+        end
+    end    
+end
+
+for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
+        assign ZxDI[i][j] = _ZxDI[i*2+j];
+    end
+end
+// end for sqscmul_gf2
+
+/////////// for mul_gf4
+// Intermediates
+// Blinded Y values
+reg [3:0] BlindedYxDN [SHARES-1 : 0];
+reg [3:0] BlindedYxDP [SHARES-1 : 0];
+// Sum of blinded Y shares
+reg [3:0] SumBlindedYxD;
+// x *( sum(y+b) ) signal
+wire [3:0] X1timesSumBlindedYxD [SHARES-1 : 0];
+wire [3:0] X2timesSumBlindedYxD [SHARES-1 : 0];
+// x * b signal
+wire [3:0] X1timesBxD [SHARES-1 : 0];
+wire [3:0] X2timesBxD [SHARES-1 : 0];
+wire [4*SHARES-1 : 0] _X1timesBxD;
+wire [4*SHARES-1 : 0] _X2timesBxD;
+// X pipelined
+reg [3:0] X1xDP [SHARES-1 : 0];
+reg [3:0] X2xDP [SHARES-1 : 0];
+// X input for GF mults => x * (y+z)
+reg [3:0] X1pipelinedOrNotxS [SHARES-1 : 0];
+reg [3:0] X2pipelinedOrNotxS [SHARES-1 : 0];
+
+
+//////////////// for sqscmul_gf2
+// Intermediates
+// Blinded Y values
+// reg [1:0] BlindedYxDN_low [SHARES-1 : 0];
+// reg [1:0] BlindedXxDP [SHARES-1 : 0];
+// Sum of blinded Y shares
+// reg [1:0] SumBlindedYxD_low;
+// x *( sum(y+b) ) signal
+wire [1:0] XtimesSumBlindedYxD [SHARES-1 : 0];
+// x * b signal
+wire [1:0] XtimesBxD [SHARES-1 : 0];
+wire [2*SHARES-1 : 0] _XtimesBxD;
+// X input for GF mults => x * (y+z)
+reg [1:0] XpipelinedOrNotxS [SHARES-1 : 0];
+
+
+
+//////////////// for mul_gf4
+// For first-order optimizaion only:
+wire [3:0] X1timesYxS [SHARES-1 : 0];
+wire [3:0] X1timesBlindedY [SHARES-1 : 0];
+wire [3:0] X2timesYxS [SHARES-1 : 0];
+wire [3:0] X2timesBlindedY [SHARES-1 : 0];
+// Y pipelined
+reg [3:0] YxDP [SHARES-1 : 0];
+// X and Y multiplier inputs depending on pipelinign selection
+wire [3:0] X1xD [SHARES-1 : 0];
+wire [3:0] X2xD [SHARES-1 : 0];
+wire [3:0] YxD [SHARES-1 : 0];
+// X times blinding value B
+wire [3:0] X1_times_BxD [SHARES-1 : 0];
+wire [3:0] X1_times_B_remaskedxDN [SHARES-1 : 0];
+reg [3:0] X1_times_B_remaskedxDP [SHARES-1 : 0];
+
+wire [3:0] X2_times_BxD [SHARES-1 : 0];
+wire [3:0] X2_times_B_remaskedxDN [SHARES-1 : 0];
+reg [3:0] X2_times_B_remaskedxDP [SHARES-1 : 0];
+
+//////////////// for sqscmul_gf2
+wire [1:0] XtimesYxS [SHARES-1 : 0];
+wire [1:0] XtimesBlindedY [SHARES-1 : 0];
+// Y pipelined
+reg [1:0] XxDP [SHARES-1 : 0];
+// X and Y multiplier inputs depending on pipelinign selection
+wire [1:0] XxD [SHARES-1 : 0];
+wire [1:0] YxD_low [SHARES-1 : 0];
+// X times blinding value B
+wire [1:0] X_times_BxD [SHARES-1 : 0];
+wire [1:0] X_times_B_remaskedxDN [SHARES-1 : 0];
+reg [1:0] X_times_B_remaskedxDP [SHARES-1 : 0];
+
+//////////////// for mul_gf4
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 4; j=j+1) begin
+        assign X1timesBxD[i][j] = _X1timesBxD[i*4+j];
+        assign X2timesBxD[i][j] = _X2timesBxD[i*4+j];
+    end
+end
+
+//////////////// for sqscmul_gf2
+for (i = 0; i < SHARES; i=i+1) begin
+    for (j = 0; j < 2; j=j+1) begin
+        assign XtimesBxD[i][j] = _XtimesBxD[i*2+j];
+    end
+end
+
+// First_order optimized variant
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
+    // Blinding of Y
+    // process blind_y_p
+    wire [1:0] Y0xorY1xD [SHARES-1 : 0]; // sqsc的输入
+    wire [1:0] Y0xorY12xD [SHARES-1 : 0]; // sqsc的结果
+
+    always @(*) begin
+        BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
+        BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
+        // BlindedYxDN_low[1] = BlindedYxDN[1][1:0];
+        // BlindedYxDN_low[0] = BlindedYxDN[0][1:0];
+    end
+
+    // square scaler
+    for (i = 0; i < SHARES; i=i+1) begin
+        assign Y0xorY1xD[i] = XxDI[i] ^ YxDI[i];
+        scale square_scaler_2_inst (
+            .a(Y0xorY1xD[i]),
+            .q(Y0xorY12xD[i])
+        );
+    end
+
+    // Select inputs for multipliers depending if pipelining is used
+    if (PIPELINED == 1) begin
+        for (i = 0; i < SHARES; i = i + 1) begin
+            assign X1xD[i] = X1xDP[i];
+            assign X2xD[i] = X2xDP[i];
+            assign YxD[i] = YxDP[i];
+            assign XxD[i] = YxDP[i][3:2];
+            assign YxD_low[i] = YxDP[i][1:0];
+        end
+    end
+    else begin
+        for (i = 0; i < SHARES; i = i + 1) begin
+            assign X1xD[i] = X1xDI[i];
+            assign X2xD[i] = X2xDI[i];
+            assign YxD[i] = YxDI[i];
+            assign XxD[i] = YxDI[i][3:2];
+            assign YxD_low[i] = YxDI[i][1:0];
+        end
+    end
+
+    // Remask X * B ... + Z
+    assign X1_times_B_remaskedxDN[0] = X1_times_BxD[0] ^ Z1xDI[0];
+    assign X1_times_B_remaskedxDN[1] = X1_times_BxD[1] ^ Z1xDI[0];
+
+    assign X2_times_B_remaskedxDN[0] = X2_times_BxD[0] ^ Z2xDI[0];
+    assign X2_times_B_remaskedxDN[1] = X2_times_BxD[1] ^ Z2xDI[0];
+
+    assign X_times_B_remaskedxDN[0] = X_times_BxD[0] ^ ZxDI[0] ^ Y0xorY12xD[0];
+    assign X_times_B_remaskedxDN[1] = X_times_BxD[1] ^ ZxDI[0] ^ Y0xorY12xD[1];
+
+    // Output
+    assign Q1xDO[0] = X1timesYxS[0] ^ X1_times_B_remaskedxDP[0];
+    assign Q1xDO[1] = X1timesYxS[1] ^ X1_times_B_remaskedxDP[1];
+    assign Q2xDO[0] = X2timesYxS[0] ^ X2_times_B_remaskedxDP[0];
+    assign Q2xDO[1] = X2timesYxS[1] ^ X2_times_B_remaskedxDP[1];
+
+    assign QxDO[0] = XtimesYxS[0] ^ X_times_B_remaskedxDP[0];
+    assign QxDO[1] = XtimesYxS[1] ^ X_times_B_remaskedxDP[1];
+
+
+    // Remask multiplication results from different domains
+    // process x_times_b_register_p
+    integer k;
+    always @(posedge ClkxCI) begin : proc_
+        X1_times_B_remaskedxDP[0] <= X1_times_B_remaskedxDN[0];
+        X1_times_B_remaskedxDP[1] <= X1_times_B_remaskedxDN[1];
+        X2_times_B_remaskedxDP[0] <= X2_times_B_remaskedxDN[0];
+        X2_times_B_remaskedxDP[1] <= X2_times_B_remaskedxDN[1];
+        X_times_B_remaskedxDP[0] <= X_times_B_remaskedxDN[0];
+        X_times_B_remaskedxDP[1] <= X_times_B_remaskedxDN[1];
+
+        for (k = 0; k < SHARES; k=k+1) begin
+            YxDP[k] = YxDI[k];
+        end
+    end
+
+    // Multipliers
+    // the first instance
+    for (i = 0; i < SHARES; i = i + 1) begin
+        gf2_mul #(.N(4)) x1_times_y(
+            .AxDI(X1xD[i]),
+            .BxDI(YxD[i]^BlindedYxDP[i]),
+            .QxDO(X1timesYxS[i])
+        );
+
+        gf2_mul #(.N(4)) x1_times_b(
+            .AxDI(X1xDI[i]),
+            .BxDI(BxDI[0]),
+            .QxDO(X1_times_BxD[i])
+        );
+    end
+    // the second instance
+    for (i = 0; i < SHARES; i = i + 1) begin
+        gf2_mul #(.N(4)) x2_times_y(
+            .AxDI(X2xD[i]),
+            .BxDI(YxD[i]^BlindedYxDP[i]),
+            .QxDO(X2timesYxS[i])
+        );
+
+        gf2_mul #(.N(4)) x2_times_b(
+            .AxDI(X2xDI[i]),
+            .BxDI(BxDI[0]),
+            .QxDO(X2_times_BxD[i])
+        );
+    end
+    // multipliers for sqscmul_gf2
+    for (i = 0; i < SHARES; i = i + 1) begin
+        gf2_mul #(.N(2)) x_times_y(
+            .AxDI(XxD[i]),
+            .BxDI(YxD_low[i]^BlindedYxDP[i][1:0]),
+            .QxDO(XtimesYxS[i])
+        );
+
+        gf2_mul #(.N(2)) x_times_b(
+            .AxDI(XxDI[i]),
+            .BxDI(BxDI_low[0]),
+            .QxDO(X_times_BxD[i])
+        );
+    end
+end
+
+
+
+// NO First_order optimized variant
+if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
+    reg [3:0] SumBlindedY;
+    integer k;
+    
+    //always @(BlindedYxDP or BxDI or X1xDI or X1xDP or YxDI) begin
+    always @(*) begin
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDN[k] = BlindedYxDP[k];
+        end
+        SumBlindedY = 4'b0000;
+        // per share
+        for (k = 0; k < SHARES; k = k + 1) begin
+            BlindedYxDN[k] = YxDI[k] ^ BxDI[k];
+            // Sum of blinded Y
+            SumBlindedY = SumBlindedY ^ BlindedYxDP[k];
+            // X input for GF mults => x * (y + z)
+            if (PIPELINED == 1) begin
+                X1pipelinedOrNotxS[k] = X1xDP[k];
+                X2pipelinedOrNotxS[k] = X2xDP[k];
+                XpipelinedOrNotxS[k] = XxDP[k];
+            end
+            else begin
+                X1pipelinedOrNotxS[k] = X1xDI[k];
+                X2pipelinedOrNotxS[k] = X2xDI[k];
+                XpipelinedOrNotxS[k] = XxDI[k];
+            end
+        end
+        SumBlindedYxD = SumBlindedY;
+    end
+
+    // Generate multipliers calculating x * (sum(y+b))
+    for (i = 0; i < SHARES; i = i + 1) begin
+            gf2_mul #(.N(4)) gf4_mul_1(
+            .AxDI(X1pipelinedOrNotxS[i]),
+            .BxDI(SumBlindedYxD),
+            .QxDO(X1timesSumBlindedYxD[i])
+        );
+    end
+
+    for (i = 0; i < SHARES; i = i + 1) begin
+            gf2_mul #(.N(4)) gf4_mul_2(
+            .AxDI(X2pipelinedOrNotxS[i]),
+            .BxDI(SumBlindedYxD),
+            .QxDO(X2timesSumBlindedYxD[i])
+        );
+    end
+    
+    for (i = 0; i < SHARES; i = i + 1) begin
+            gf2_mul #(.N(2)) gf2_mul(
+            .AxDI(XpipelinedOrNotxS[i]),
+            .BxDI(SumBlindedYxD[1:0]),
+            .QxDO(XtimesSumBlindedYxD[i])
+        );
+    end
+
+    shared_mul_gf4 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf4_1(
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._XxDI(_X1xDI),
+        ._YxDI(_BxDI),
+        ._ZxDI(_Z1xDI),
+        ._QxDO(_X1timesBxD)
+    );
+
+    shared_mul_gf4 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf4_2(
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._XxDI(_X2xDI),
+        ._YxDI(_BxDI),
+        ._ZxDI(_Z2xDI),
+        ._QxDO(_X2timesBxD)
+    );
+
+    shared_XmulBxorsqsc_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
+        .ClkxCI(ClkxCI),
+        // .RstxBI(RstxBI),
+        ._XxDI(_XxDI),
+        ._BxDI(_BxDI_low),
+        ._YxDI(_YxDI_low),
+        ._ZxDI(_ZxDI),
+        ._QxDO(_XtimesBxD)
+    );
+
+    // Output signal x*y = x*(y+b) + x*b
+    for (i = 0; i < SHARES; i = i + 1) begin
+        assign Q1xDO[i] = X1timesSumBlindedYxD[i] ^ X1timesBxD[i];
+        assign Q2xDO[i] = X2timesSumBlindedYxD[i] ^ X2timesBxD[i];
+        assign QxDO[i] = XtimesSumBlindedYxD[i] ^ XtimesBxD[i];
+    end
+    integer k;
+    always @(posedge ClkxCI) begin : proc_xxdp
+        for (k = 0; k < SHARES; k = k + 1) begin
+            XxDP[k] = YxDI[k][3:2];
+        end
+    end
+end
+
+
+// General stuff used for all variants:
+// Use pipelining --> X needs to be registered
+if (PIPELINED == 1) begin
+    integer k;
+    always @(posedge ClkxCI) begin : proc_
+        for (k = 0; k < SHARES; k = k + 1) begin
+            X1xDP[k] = X1xDI[k];
+            X2xDP[k] = X2xDI[k];
+        end
+    end
+end
+
+// Blinding register process
+always @(posedge ClkxCI) begin : proc_
+    integer k;
+    for (k = 0; k < SHARES; k = k + 1) begin
+        BlindedYxDP[k] <= BlindedYxDN[k];
+    end
+end
+
+
+endmodule

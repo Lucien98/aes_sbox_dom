@@ -102,10 +102,8 @@ end
 // First_order optimized variant
 if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     
-    wire [1:0] Y0xorY1xDN [SHARES-1 : 0]; // sqsc的输入
-    wire [1:0] Y0xorY12xDN [SHARES-1 : 0]; // sqsc的结果
-    reg [1:0] Y0xorY1xDP [SHARES-1 : 0]; // sqsc的输入
-    reg [1:0] Y0xorY12xDP [SHARES-1 : 0]; // sqsc的结果
+    wire [1:0] Y0xorY1xD [SHARES-1 : 0]; // sqsc的输入
+    wire [1:0] Y0xorY12xD [SHARES-1 : 0]; // sqsc的结果
     
 
     always @(*) begin
@@ -115,10 +113,10 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
 
     // square scaler
     for (i = 0; i < SHARES; i=i+1) begin
-        assign Y0xorY1xDN[i] = XxDI[i] ^ YxDI[i];
+        assign Y0xorY1xD[i] = XxDI[i] ^ YxDI[i];
         scale square_scaler_2_inst (
-            .a(Y0xorY1xDN[i]),
-            .q(Y0xorY12xDN[i])
+            .a(Y0xorY1xD[i]),
+            .q(Y0xorY12xD[i])
         );
     end
 
@@ -141,27 +139,19 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
     end
 
     // Remask X * B ... + Z
-    assign X_times_B_remaskedxDN[0] = X_times_BxD[0] ^ ZxDI[0];
-    assign X_times_B_remaskedxDN[1] = X_times_BxD[1] ^ ZxDI[0];
+    assign X_times_B_remaskedxDN[0] = X_times_BxD[0] ^ ZxDI[0] ^ Y0xorY12xD[0];
+    assign X_times_B_remaskedxDN[1] = X_times_BxD[1] ^ ZxDI[0] ^ Y0xorY12xD[1];
 
     // Output
-    assign QxDO[0] = XtimesYxS[0] /*^ XtimesBlindedY[0]*/ ^ X_times_B_remaskedxDP[0] ^ Y0xorY12xDP[0];
-    assign QxDO[1] = XtimesYxS[1] /*^ XtimesBlindedY[1]*/ ^ X_times_B_remaskedxDP[1] ^ Y0xorY12xDP[1];
+    assign QxDO[0] = XtimesYxS[0] ^ X_times_B_remaskedxDP[0];
+    assign QxDO[1] = XtimesYxS[1] ^ X_times_B_remaskedxDP[1];
 
 
     // Remask multiplication results from different domains
     // process x_times_b_register_p
-    always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
-        // if (~RstxBI) begin // asynchronous reset (active low)
-        //     X_times_B_remaskedxDP[0] <= 2'b00;
-        //     X_times_B_remaskedxDP[1] <= 2'b00;
-        // end
-        // else begin // rising clock edge
-            X_times_B_remaskedxDP[0] <= X_times_B_remaskedxDN[0];
-            X_times_B_remaskedxDP[1] <= X_times_B_remaskedxDN[1];
-            Y0xorY12xDP[0] <= Y0xorY12xDN[0];
-            Y0xorY12xDP[1] <= Y0xorY12xDN[1];
-        // end
+    always @(posedge ClkxCI) begin : proc_
+        X_times_B_remaskedxDP[0] <= X_times_B_remaskedxDN[0];
+        X_times_B_remaskedxDP[1] <= X_times_B_remaskedxDN[1];
     end
 
     // Multipliers
@@ -171,12 +161,6 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
             .BxDI(YxD[i]^BlindedYxDP[i]),
             .QxDO(XtimesYxS[i])
         );
-
-        // gf2_mul #(.N(2)) x_times_blinded_y(
-        //     .AxDI(XxD[i]),
-        //     .BxDI(BlindedYxDP[i]),
-        //     .QxDO(XtimesBlindedY[i])
-        // );
 
         gf2_mul #(.N(2)) x_times_b(
             .AxDI(XxDI[i]),
@@ -243,38 +227,20 @@ end
 // General stuff used for all variants:
 // Use pipelining --> X needs to be registered
 if (PIPELINED == 1) begin
-    always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
+    always @(posedge ClkxCI) begin : proc_
         integer k;
-        // if (~RstxBI) begin // asynchronous reset (active low)
-        //     for (k = 0; k < SHARES; k = k + 1) begin
-        //         XxDP[k] = 2'b00;
-        //         YxDP[k] = 2'b00;
-        //     end
-        // end
-        // else begin // rising clock edge
-            for (k = 0; k < SHARES; k = k + 1) begin
-                XxDP[k] = XxDI[k];
-                YxDP[k] = YxDI[k];
-            end
-        // end
+        for (k = 0; k < SHARES; k = k + 1) begin
+            XxDP[k] = XxDI[k];
+            YxDP[k] = YxDI[k];
+        end
     end
 end
 
 // Blinding register process
-always @(posedge ClkxCI/* or negedge RstxBI*/) begin : proc_
+always @(posedge ClkxCI) begin : proc_
     integer k;
-    // if (~RstxBI) begin // asynchronous reset (active low)
-    //     for (k = 0; k < SHARES; k = k + 1) begin
-    //         BlindedYxDP[k] <= 2'b00;
-    //     end
-    // end
-    // else begin // rising clock edge
-        for (k = 0; k < SHARES; k = k + 1) begin
-            BlindedYxDP[k] <= BlindedYxDN[k];
-        end
-    // end
+    for (k = 0; k < SHARES; k = k + 1) begin
+        BlindedYxDP[k] <= BlindedYxDN[k];
+    end
 end
-
-
-    
 endmodule

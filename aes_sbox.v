@@ -15,28 +15,19 @@ module aes_sbox #(
 );
 
 `include "blind.vh"
-// generate
-`define OPTO1O2
 `ifndef OPTO1O2
-    `define NEED_EXTRA_BGF2
-`else
-        if (SHARES > 3) begin
-            // localparam bcoeff = 8;
-            `define NEED_EXTRA_BGF2
-        end else begin
-            localparam bcoeff = 6;
-        end
-`endif
-
-`ifdef NEED_EXTRA_BGF2
     `ifndef RAND_OPT
         localparam bcoeff = 18;
     `else 
         localparam bcoeff = 8;
     `endif
-    `undef NEED_EXTRA_BGF2  // 避免宏污染
+`else
+    `ifndef RAND_OPT
+        parameter bcoeff = SHARES > 3 ? 6 : 18;
+    `else 
+        parameter bcoeff = SHARES <= 3 ? 6 : 8;
+    `endif
 `endif
-// endgenerate
 
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam n_random_z = SHARES*(SHARES-1);
@@ -70,24 +61,26 @@ wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI = RandomB[4*blind_n_rnd +: 2*blind_n_rnd];
 
 `ifndef OPTO1O2
     wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
-    `define NEED_EXTRA_BGF2
+    `define NOT_OPTO1O2
 `else
     generate
         if (SHARES > 3) begin
-            wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
-            `define NEED_EXTRA_BGF2
+            `define DEFBgf2_2
         end
     endgenerate
 `endif
+`ifdef DEFBgf2_2
+wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
+`endif
 
-`ifdef NEED_EXTRA_BGF2
+`ifdef NOT_OPTO1O2
     `ifndef RAND_OPT
         wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI = RandomB[14*blind_n_rnd +: 4*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI = RandomB[10*blind_n_rnd +: 2*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI = RandomB[8*blind_n_rnd +: 2*blind_n_rnd];
     `endif
-    `undef NEED_EXTRA_BGF2  // 避免宏污染
+    `undef NOT_OPTO1O2  // 避免宏污染
 `endif
 
 
@@ -278,18 +271,32 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         );
     end
 
-    // Single instances:
-    // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
-`ifndef PINI
-    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+`ifndef OPTO1O2
+    `ifndef PINI
+        // 0: noia; 1:hpc3; 2: sni; 3:sni+pini, probably impossible in 1 cycle
+        localparam stage1_type = 0;
+    `else 
+        localparam stage1_type = 1;
+    `endif
+`else 
+    `ifndef PINI
+        localparam stage1_type = SHARES <= 3 ? 2 : 0;
+    `else 
+        localparam stage1_type = SHARES <= 3 ? 3 : 1;
+    `endif
+`endif
+
+if (stage1_type == 0) begin
+    shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
         ._YxDI(_Y1xD),
         ._XxDI(_Y0xD),
-        ._ZxDI({_Zmul1xDI,_Bgf4_1xDI}),
+        ._ZxDI(_Zmul1xDI),
         ._QxDO(_Y0sqscmulY1xD)
     );
-`else
+end
+else if (stage1_type == 1) begin
     shared_hpc3_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
         .ClkxCI(ClkxCI),
@@ -300,7 +307,30 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._RxDI(_Zmul1xDI[2*SHARES*(SHARES-1) +: 2*SHARES*(SHARES-1)]),
         ._QxDO(_Y0sqscmulY1xD)
     );
-`endif 
+end
+else if(stage1_type == 2) begin
+    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y1xD),
+        ._XxDI(_Y0xD),
+        ._ZxDI({_Zmul1xDI,_Bgf4_1xDI}),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+end
+else if(stage1_type == 3) begin
+    initial begin
+        $display("ERROR: OPTO1O2 and PINI can not be defined at the same time!");
+        $finish;
+    end
+end
+
+`ifndef OPTO1O2
+    /*0: DOM-dep, 1: SNI*/
+    localparam stage2gf2_type = 0;
+`else 
+    localparam stage2gf2_type = SHARES <= 3 ? 1 : 0;
+`endif
 
     wire [2*SHARES-1 : 0] _A;
     wire [2*SHARES-1 : 0] _B;
@@ -311,7 +341,21 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._A   (_A),
         ._B   (_B)
         );
-    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES), .N(2))
+
+if (stage2gf2_type == 0) begin
+    real_dom_shared_sqscmul_gf2 # (.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    a_sqscmul_b
+    (
+        .ClkxCI(ClkxCI),
+        ._XxDI(_A),
+        ._YxDI(_B),
+        ._ZxDI(_Zgf2_1xDI),
+        ._BxDI(_Bgf2_1xDI),
+        ._QxDO(_InverterOutxD)
+    );
+end
+else begin
+    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES), .N(2))
     a_sqscmul_b
     (
         .ClkxCI(ClkxCI),
@@ -320,32 +364,29 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._ZxDI({_Zgf2_1xDI,_Bgf2_1xDI}),
         ._QxDO(_InverterOutxD)
     );
+end
+
+`ifndef OPTO1O2
+    `ifndef RAND_OPT
+        /*
+        0: 2 (or 4) independent dom-dep; 
+        1: 2 (or 4) dom-dep shares the same blinded Y; 
+        2: 2 (or 4) dom-indep; 
+        */
+        localparam stage2gf4_type = 0;
+    `else 
+        localparam stage2gf4_type = 1;
+    `endif
+`else 
+    `ifndef RAND_OPT
+        localparam stage2gf4_type = SHARES <= 3 ? 2 : 0;
+    `else 
+        localparam stage2gf4_type = SHARES <= 3 ? 2 : 1;
+    `endif
+`endif
 
 
-`ifdef OPTO1O2
-
-    // Multiply Inv and Y0 (GF 2^4)
-    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
-    mult_msb (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_Y0sqscmulY1xD),
-        ._XxDI(_Y0_0xDP),
-        ._ZxDI(_Zmul2xDI), 
-        ._QxDO(_InverseMSBxD)
-    );
-
-    // Multiply Y1 and Inv (GF2^4)
-    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
-    mult_lsb (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_Y0sqscmulY1xD),
-        ._XxDI(_Y1_0xDP),
-        ._ZxDI(_Zmul3xDI), 
-        ._QxDO(_InverseLSBxD)
-    );
-`else
-
-`ifndef RAND_OPT
+if (stage2gf4_type == 0) begin
     // Multiply Inv and Y0 (GF 2^4)
     real_dom_shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
     mult_msb (
@@ -367,84 +408,6 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._BxDI(_Bgf4_2xDI),
 		._QxDO(_InverseLSBxD)
     );
-
-`else
-    real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
-    mult_lsb (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_Y0sqscmulY1xD),
-        ._X1xDI(_Y0_0xDP),
-        ._X2xDI(_Y1_0xDP),
-        ._Z1xDI(_Zmul2xDI), 
-        ._Z2xDI(_Zmul3xDI), 
-        ._BxDI(_Bgf4_1xDI),
-        ._Q2xDO(_InverseLSBxD),
-        ._Q1xDO(_InverseMSBxD)
-    );
-`endif
-`endif
-
-`ifdef OPTO1O2
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
-    theta_mul_0 (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_LSBLSB),
-        ._ZxDI(_Zgf2_2xDI),
-        ._QxDO(_InvOutLSBLSB)
-    );
-
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
-    theta_mul_1 (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_LSBMSB),
-        ._ZxDI(_Zgf2_3xDI),
-        ._QxDO(_InvOutLSBMSB)
-    );
-
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
-    theta_mul_2 (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_MSBLSB),
-        ._ZxDI(_Zgf2_4xDI),
-        ._QxDO(_InvOutMSBLSB)
-    );
-
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
-    theta_mul_3 (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_InverterOutxD),
-        ._XxDI(_MSBMSB),
-        ._ZxDI(_Zgf2_5xDI),
-        ._QxDO(_InvOutMSBMSB)
-    );
-
-
-`else
-
-`ifdef RAND_OPT
-    real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
-    theta_mul_quad (
-        .ClkxCI(ClkxCI),
-        ._YxDI(_InverterOutxD),
-        ._X1xDI(_LSBLSB),
-        ._X2xDI(_LSBMSB),
-        ._X3xDI(_MSBLSB),
-        ._X4xDI(_MSBMSB),
-        ._Z1xDI(_Zgf2_2xDI),
-        ._Z2xDI(_Zgf2_3xDI),
-        ._Z3xDI(_Zgf2_4xDI),
-        ._Z4xDI(_Zgf2_5xDI),
-        ._BxDI(_Bgf2_2xDI),
-        ._Q1xDO(_InvOutLSBLSB),
-        ._Q2xDO(_InvOutLSBMSB),
-        ._Q3xDO(_InvOutMSBLSB),
-        ._Q4xDO(_InvOutMSBMSB)
-    );
-
-`else
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     theta_mul_0 (
         .ClkxCI(ClkxCI),
@@ -485,9 +448,97 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._QxDO(_InvOutMSBMSB)
     );
 
-`endif
-`endif
+end
+else if (stage2gf4_type == 1) begin
+    real_dom_shared_mul_gf4_paired #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._X1xDI(_Y0_0xDP),
+        ._X2xDI(_Y1_0xDP),
+        ._Z1xDI(_Zmul2xDI), 
+        ._Z2xDI(_Zmul3xDI), 
+        ._BxDI(_Bgf4_1xDI),
+        ._Q2xDO(_InverseLSBxD),
+        ._Q1xDO(_InverseMSBxD)
+    );
 
+    real_dom_shared_mul_gf2_quadruple #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    theta_mul_quad (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._X1xDI(_LSBLSB),
+        ._X2xDI(_LSBMSB),
+        ._X3xDI(_MSBLSB),
+        ._X4xDI(_MSBMSB),
+        ._Z1xDI(_Zgf2_2xDI),
+        ._Z2xDI(_Zgf2_3xDI),
+        ._Z3xDI(_Zgf2_4xDI),
+        ._Z4xDI(_Zgf2_5xDI),
+        ._BxDI(_Bgf2_2xDI),
+        ._Q1xDO(_InvOutLSBLSB),
+        ._Q2xDO(_InvOutLSBMSB),
+        ._Q3xDO(_InvOutMSBLSB),
+        ._Q4xDO(_InvOutMSBMSB)
+    );
+end
+else if (stage2gf4_type == 2) begin
+    // Multiply Inv and Y0 (GF 2^4)
+    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    mult_msb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._XxDI(_Y0_0xDP),
+        ._ZxDI(_Zmul2xDI), 
+        ._QxDO(_InverseMSBxD)
+    );
+
+    // Multiply Y1 and Inv (GF2^4)
+    shared_mul_gf4 #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y0sqscmulY1xD),
+        ._XxDI(_Y1_0xDP),
+        ._ZxDI(_Zmul3xDI), 
+        ._QxDO(_InverseLSBxD)
+    );
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_0 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBLSB),
+        ._ZxDI(_Zgf2_2xDI),
+        ._QxDO(_InvOutLSBLSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_1 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_LSBMSB),
+        ._ZxDI(_Zgf2_3xDI),
+        ._QxDO(_InvOutLSBMSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_2 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBLSB),
+        ._ZxDI(_Zgf2_4xDI),
+        ._QxDO(_InvOutMSBLSB)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    theta_mul_3 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_InverterOutxD),
+        ._XxDI(_MSBMSB),
+        ._ZxDI(_Zgf2_5xDI),
+        ._QxDO(_InvOutMSBMSB)
+    );
+
+end
 
 end
 

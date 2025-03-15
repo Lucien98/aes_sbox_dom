@@ -1,7 +1,5 @@
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
-    // Only if pipelined variant is used!
-    parameter EIGHT_STAGED = 0, // 0: no
     parameter SHARES = 2
 ) (
     ClkxCI,
@@ -216,7 +214,7 @@ for (i = 0; i < SHARES; i = i + 1) begin
 end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
-if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
+if (SHARES > 1 && PIPELINED == 1) begin
     // Add pipelining stage after linear mapping at input,
     // between Stage 1 and 2
     integer k;

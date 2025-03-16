@@ -5,8 +5,8 @@ module tb_aes_sbox ();
 
     localparam N = 2;
     localparam PIPELINED = 1;
-    localparam EIGHT_STAGED = 0;
     localparam SHARES = 2; // change it to test different cases
+    localparam bcoeff = _bcoeff(SHARES);
 
     // General signals
 	reg ClkxCI;
@@ -22,11 +22,11 @@ module tb_aes_sbox ();
     reg [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
     reg [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
     // reg [4*blind_n_rnd-1 : 0] _Bmul1xDI; // for y1 * y0
-    reg [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
-    reg [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
-`ifndef RAND_OPT
-    reg [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
-`endif
+    reg [(2+bcoeff)*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
+//     reg [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
+// `ifndef RAND_OPT
+//     reg [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
+// `endif
     wire [8*SHARES-1 : 0] _QxDO;
 
     reg [7:0] XxDI [SHARES-1 : 0];
@@ -42,7 +42,7 @@ module tb_aes_sbox ();
         end
     end
 
-    aes_sbox #(.PIPELINED(PIPELINED), .EIGHT_STAGED(EIGHT_STAGED), .SHARES(SHARES))
+    aes_sbox #(.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_aes_sbox (
         .ClkxCI(ClkxCI),
         // .RstxBI(RstxBI),
@@ -53,11 +53,11 @@ module tb_aes_sbox ();
         ._Zinv1xDI(_Zinv1xDI),
         ._Zinv2xDI(_Zinv2xDI),
         ._Zinv3xDI(_Zinv3xDI),
-        ._Binv1xDI(_Binv1xDI),
-        ._Binv2xDI(_Binv2xDI),
-`ifndef RAND_OPT
-        ._Binv3xDI(_Binv3xDI),
-`endif
+        ._BxDI(_Binv1xDI),
+//         ._Binv2xDI(_Binv2xDI),
+// `ifndef RAND_OPT
+//         ._Binv3xDI(_Binv3xDI),
+// `endif
         ._QxDO(_QxDO)
     );
 
@@ -77,10 +77,10 @@ module tb_aes_sbox ();
             _Zinv3xDI = $random;
             // _Bmul1xDI = $random;
             _Binv1xDI = $random;
-            _Binv2xDI = $random;
-`ifndef RAND_OPT
-            _Binv3xDI = $random;
-`endif
+//             _Binv2xDI = $random;
+// `ifndef RAND_OPT
+//             _Binv3xDI = $random;
+// `endif
 		end
 		#T;
         
@@ -97,10 +97,10 @@ module tb_aes_sbox ();
                 _Zinv2xDI = $random;
                 _Zinv3xDI = $random;
                 _Binv1xDI = $random;
-                _Binv2xDI = $random;
-`ifndef RAND_OPT
-                _Binv3xDI = $random;
-`endif
+//                 _Binv2xDI = $random;
+// `ifndef RAND_OPT
+//                 _Binv3xDI = $random;
+// `endif
                 for (integer k = 0; k < SHARES; k = k + 1) begin
                     X = X ^ XxDI[k];
                     Q = Q ^ QxDO[k];

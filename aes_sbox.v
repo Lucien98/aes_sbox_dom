@@ -1,8 +1,6 @@
-`define RAND_OPT
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     // Only if pipelined variant is used!
-    parameter EIGHT_STAGED = 0, // 0: no
     parameter SHARES = 2
 ) (
     ClkxCI,
@@ -17,18 +15,18 @@ module aes_sbox #(
     _Zinv2xDI,
     _Zinv3xDI,
     // Blinding values for Inverter (for 5 stage Sbox only)
-    _Binv1xDI,
-    _Binv2xDI,
-`ifndef RAND_OPT
-    _Binv3xDI,
-`endif
+    _BxDI,
+    // _Binv2xDI,
+// `ifndef RAND_OPT
+//     _Binv3xDI,
+// `endif
     // Output Q = SBOX(X)
     _QxDO
 );
 
 `include "blind.vh"
 localparam blind_n_rnd = _blind_nrnd(SHARES);
-
+localparam bcoeff = _bcoeff(SHARES);
 
 input ClkxCI;
 // input RstxBI;
@@ -43,11 +41,11 @@ input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
 input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-input [2*blind_n_rnd-1 : 0] _Binv1xDI; // for inverter
-input [2*blind_n_rnd-1 : 0] _Binv2xDI; // ...
-`ifndef RAND_OPT
-input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
-`endif
+input [(2+bcoeff)*blind_n_rnd-1 : 0] _BxDI; // for inverter
+// input [bcoeff*blind_n_rnd-1 : 0] _Binv2xDI; // ...
+// `ifndef RAND_OPT
+// input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
+// `endif
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [7:0] XxDI [SHARES-1 : 0];
@@ -72,7 +70,7 @@ wire [3:0] Y1xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y1xD;
 wire [3:0] Y0xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0xD;
-wire [3:0] Y0xorY1xD [SHARES-1:0];
+// wire [3:0] Y0xorY1xD [SHARES-1:0];
 wire [3:0] Y0sqscmulY1xD [SHARES-1:0];
 wire [4*SHARES-1 : 0] _Y0sqscmulY1xD;
 wire [3:0] InverterInxD [SHARES-1:0];
@@ -149,7 +147,7 @@ for (i = 0; i < SHARES; i = i + 1) begin
 end
 
 // Masked and pipelined (5 staged) AES Sbox with variable order of security
-if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
+if (SHARES > 1 && PIPELINED == 1) begin
     // Add pipelining stage after linear mapping at input,
     // between Stage 1 and 2
     integer k;
@@ -247,7 +245,60 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
 
     // Single instances:
     // Y1 sqsc Y0 + Y1 mul Y0 (GF 2^4)
+`ifndef OPTO1O2
+    `ifndef PINI
+        // 0: noia; 1:hpc3; 2: sni; 3:sni+pini, probably impossible in 1 cycle
+        localparam stage1_type = 0;
+    `else 
+        localparam stage1_type = 1;
+    `endif
+`else 
+    `ifndef PINI
+        localparam stage1_type = SHARES <= 3 ? 2 : 0;
+    `else 
+        localparam stage1_type = SHARES <= 3 ? 3 : 1;
+    `endif
+`endif
 
+if (stage1_type == 0) begin
+    shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y1xD),
+        ._XxDI(_Y0xD),
+        ._ZxDI(_Zmul1xDI),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+end
+else if (stage1_type == 1) begin
+    shared_hpc3_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        ._XxDI(_Y1xD),
+        ._XxDI_prev(_Y1_0xDP),
+        ._YxDI(_Y0xD),
+        ._ZxDI(_Zmul1xDI[0 +: 2*SHARES*(SHARES-1)]),
+        ._RxDI(_Zmul1xDI[2*SHARES*(SHARES-1) +: 2*SHARES*(SHARES-1)]),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+end
+else if(stage1_type == 2) begin
+    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES))
+    inst_shared_sqscmul_gf4 (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_Y1xD),
+        ._XxDI(_Y0xD),
+        ._ZxDI({_Zmul1xDI,_BxDI[2*blind_n_rnd +: 4*blind_n_rnd]}),
+        ._QxDO(_Y0sqscmulY1xD)
+    );
+end
+else if(stage1_type == 3) begin
+    initial begin
+        $display("ERROR: OPTO1O2 and PINI can not be defined at the same time!");
+        $finish;
+    end
+end
+/*
 `ifndef PINI
     shared_sqscmul_gf4 # (.PIPELINED(PIPELINED), .SHARES(SHARES))
     inst_shared_sqscmul_gf4 (
@@ -272,8 +323,8 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
     );
 `endif 
 
-    // Inverter in GF2^4
-    inverter #(.VARIANT(1), .PIPELINED(PIPELINED), .EIGHT_STAGED_SBOX(0), .SHARES(SHARES))
+*/    // Inverter in GF2^4
+    inverter #(.VARIANT(1), .PIPELINED(PIPELINED), .SHARES(SHARES))
     inverter_gf24 (
         .ClkxCI(ClkxCI),
         // .RstxBI(RstxBI),
@@ -281,11 +332,11 @@ if (SHARES > 1 && PIPELINED == 1 && EIGHT_STAGED == 0) begin
         ._Zmul1xDI(_Zinv1xDI),
         ._Zmul2xDI(_Zinv2xDI),
         ._Zmul3xDI(_Zinv3xDI),
-        ._Bmul1xDI(_Binv1xDI),
-        ._Bmul2xDI(_Binv2xDI),
-`ifndef RAND_OPT
-        ._Bmul3xDI(_Binv3xDI),
-`endif
+        ._Bmul1xDI(_BxDI[0 +: (invbcoeff + 2) * blind_n_rnd]),
+        // ._Bmul2xDI(_Binv2xDI),
+// `ifndef RAND_OPT
+//         ._Bmul3xDI(_Binv3xDI),
+// `endif
         ._QxDO(_InverterOutxD)
     );
 

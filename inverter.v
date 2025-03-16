@@ -2,7 +2,6 @@ module inverter #(
     parameter VARIANT = 1, // 1: Masked
     parameter PIPELINED = 1, // 1: yes
     // Only for pipelined variant
-    parameter EIGHT_STAGED_SBOX = 0, // 0: no
     parameter SHARES = 2
 ) (
     ClkxCI,
@@ -14,16 +13,17 @@ module inverter #(
     _Zmul2xDI,
     _Zmul3xDI,
     _Bmul1xDI,
-    _Bmul2xDI,
-`ifndef RAND_OPT
-    _Bmul3xDI,
-`endif
+    // _Bmul2xDI,
+// `ifndef RAND_OPT
+//     _Bmul3xDI,
+// `endif
     // Outputs
     _QxDO
 );
 
 `include "blind.vh"
 localparam blind_n_rnd = _blind_nrnd(SHARES);
+localparam bcoeff = _bcoeff(SHARES);
 
 input ClkxCI;
 // input RstxBI;
@@ -31,11 +31,8 @@ input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
-input [2*blind_n_rnd-1 : 0] _Bmul1xDI;
-input [2*blind_n_rnd-1 : 0] _Bmul2xDI;
-`ifndef RAND_OPT
-input [2*blind_n_rnd-1 : 0] _Bmul3xDI;
-`endif
+input [invbcoeff*blind_n_rnd-1 : 0] _Bmul1xDI;
+// input [bcoeff*blind_n_rnd-1 : 0] _Bmul2xDI;
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];
@@ -96,7 +93,7 @@ for (i = 0; i < SHARES; i = i + 1) begin
 end
 
 // Masked Inverter for 5 staged Sbox
-if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
+if (VARIANT == 1 && PIPELINED == 1) begin
     always @(posedge ClkxCI /*or negedge RstxBI*/) begin : proc_
         integer k;
         // if (~RstxBI) begin // asynchronous reset (active low)
@@ -122,6 +119,39 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         assign QxDO[i] = {BmulExD[i], AmulExD[i]};
     end
 
+`ifndef OPTO1O2
+    `ifndef RAND_OPT
+        /*
+        0: 2 independent dom-dep mul_gf2; 1 dom-dep sqscmul_gf2
+        1: 2 dom-dep mul_gf2 shares the same blinded Y; 1 dom-dep sqscmul_gf2
+        2: 2 dom-indep; 1 sni sqscmul_gf2
+        */
+        localparam inverter_type = 0;
+    `else 
+        localparam inverter_type = 1;
+    `endif
+`else 
+    `ifndef RAND_OPT
+        localparam inverter_type = SHARES <= 3 ? 2 : 0;
+    `else 
+        localparam inverter_type = SHARES <= 3 ? 2 : 1;
+    `endif
+`endif
+
+if (inverter_type == 2) begin
+    shared_sqscmul_gf_sni # (.PIPELINED(PIPELINED), .SHARES(SHARES), .N(2))
+    a_sqscmul_b
+    (
+        .ClkxCI(ClkxCI),
+        ._XxDI(_A),
+        ._YxDI(_B),
+        ._ZxDI({_Zmul1xDI,_Bmul1xDI}),
+        ._QxDO(_AsqscmulBxD)
+    );
+
+end
+else begin
+
     // Multipliers
     real_dom_shared_sqscmul_gf2 # (.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     a_sqscmul_b
@@ -131,47 +161,64 @@ if (VARIANT == 1 && PIPELINED == 1 && EIGHT_STAGED_SBOX == 0) begin
         ._XxDI(_A),
         ._YxDI(_B),
         ._ZxDI(_Zmul1xDI),
-        ._BxDI(_Bmul1xDI),
+        ._BxDI(_Bmul1xDI[0 +: 2*blind_n_rnd]),
         ._QxDO(_AsqscmulBxD)
     );
+    
+end
 
-`ifndef RAND_OPT
-    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+if (inverter_type == 2) begin
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
     a_mul_e (
         .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
         ._XxDI(_AxDP),
         ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul2xDI),
-        ._BxDI(_Bmul2xDI),
+        ._QxDO(_AmulExD)
+    );
+
+    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES))
+    b_mul_e (
+        .ClkxCI(ClkxCI),
+        ._XxDI(_BxDP),
+        ._YxDI(_AsqscmulBxD),
+        ._ZxDI(_Zmul3xDI),
+        ._QxDO(_BmulExD)
+    );
+end else if (inverter_type == 1) begin
+    real_dom_shared_mul_gf2_paired #(.PIPELINED(1),.SHARES(SHARES))
+    mult_lsb (
+        .ClkxCI(ClkxCI),
+        ._YxDI(_AsqscmulBxD),
+        ._X1xDI(_AxDP),
+        ._X2xDI(_BxDP),
+        ._Z1xDI(_Zmul2xDI),
+        ._Z2xDI(_Zmul3xDI),
+        ._BxDI(_Bmul1xDI[2*blind_n_rnd +: 2*blind_n_rnd]),
+        ._Q1xDO(_AmulExD),
+        ._Q2xDO(_BmulExD)
+    );
+end else if (inverter_type == 0) begin
+    real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
+    a_mul_e (
+        .ClkxCI(ClkxCI),
+        ._XxDI(_AxDP),
+        ._YxDI(_AsqscmulBxD),
+        ._ZxDI(_Zmul2xDI),
+        ._BxDI(_Bmul1xDI[2*blind_n_rnd +: 2*blind_n_rnd]),
         ._QxDO(_AmulExD)
     );
 
     real_dom_shared_mul_gf2 #(.PIPELINED(PIPELINED), .FIRST_ORDER_OPTIMIZATION(1), .SHARES(SHARES))
     b_mul_e (
         .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
         ._XxDI(_BxDP),
         ._YxDI(_AsqscmulBxD),
         ._ZxDI(_Zmul3xDI),
-        ._BxDI(_Bmul3xDI),
+        ._BxDI(_Bmul1xDI[4*blind_n_rnd +: 2*blind_n_rnd]),
         ._QxDO(_BmulExD)
     );
-`else
-    real_dom_shared_mul_gf2_paired #(.PIPELINED(1),.SHARES(SHARES))
-    mult_lsb (
-        .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
-        ._YxDI(_AsqscmulBxD),
-        ._X1xDI(_AxDP),
-        ._X2xDI(_BxDP),
-        ._Z1xDI(_Zmul2xDI),
-        ._Z2xDI(_Zmul3xDI),
-        ._BxDI(_Bmul2xDI),
-        ._Q1xDO(_AmulExD),
-        ._Q2xDO(_BmulExD)
-    );
-`endif
+end
 
 end
 

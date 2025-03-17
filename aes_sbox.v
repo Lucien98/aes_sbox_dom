@@ -13,25 +13,12 @@ module aes_sbox #(
 );
 
 `include "blind.vh"
-`ifndef OPTO1O2
-    `ifndef RAND_OPT
-        localparam bcoeff = 18;
-    `else 
-        localparam bcoeff = 8;
-    `endif
-`else
-    `ifndef RAND_OPT
-        parameter bcoeff = SHARES > 3 ? 6 : 18;
-    `else 
-        parameter bcoeff = SHARES <= 3 ? 6 : 8;
-    `endif
-`endif
 
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam n_random_z = SHARES*(SHARES-1);
+localparam bcoeff = _bcoeff(SHARES);
 
 input ClkxCI;
-// input RstxBI;
 input [8*SHARES-1 : 0] _XxDI;
 
 input [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;

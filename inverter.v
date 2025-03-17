@@ -24,6 +24,7 @@ module inverter #(
 `include "blind.vh"
 localparam blind_n_rnd = _blind_nrnd(SHARES);
 localparam bcoeff = _bcoeff(SHARES);
+localparam invbcoeff = _invbcoeff(SHARES);
 
 input ClkxCI;
 // input RstxBI;

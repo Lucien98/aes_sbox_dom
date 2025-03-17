@@ -1,6 +1,6 @@
 `define RAND_OPT
 // `define PINI
-// `define NOIA
+`define NOIA
 // `define FV
 `define OPTO1O2
 
@@ -30,16 +30,20 @@ begin
 end
 endfunction
 
-`ifndef OPTO1O2
-    `ifndef RAND_OPT
-        localparam invbcoeff = 4;
+function integer _invbcoeff(input integer d);
+begin
+    `ifndef OPTO1O2
+        `ifndef RAND_OPT
+            _invbcoeff = 4;
+        `else
+            _invbcoeff = 2;
+        `endif 
     `else
-        localparam invbcoeff = 2;
-    `endif 
-`else
-    `ifndef RAND_OPT
-        localparam invbcoeff = (d <= 3 ? 2 : 4);
-    `else
-        localparam invbcoeff = 2;
-    `endif 
-`endif
+        `ifndef RAND_OPT
+            _invbcoeff = (d <= 3 ? 2 : 4);
+        `else
+            _invbcoeff = 2;
+        `endif 
+    `endif
+end
+endfunction

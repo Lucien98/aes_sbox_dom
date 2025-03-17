@@ -443,7 +443,6 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
         assign Q2xDO[i] = X2timesSumBlindedYxD[i] ^ X2timesBxD[i];
         assign QxDO[i] = XtimesSumBlindedYxD[i] ^ XtimesBxD[i];
     end
-    integer k;
     always @(posedge ClkxCI) begin : proc_xxdp
         for (k = 0; k < SHARES; k = k + 1) begin
             XxDP[k] = YxDI[k][3:2];

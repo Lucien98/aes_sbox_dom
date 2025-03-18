@@ -21,13 +21,13 @@ function integer _bcoeff(input integer d);
 	    `ifndef RAND_OPT
 	        _bcoeff = 18;
 	    `else 
-	        _bcoeff = 8;
+	        _bcoeff = 6;
 	    `endif
 	`else
 	    `ifndef RAND_OPT
 	        _bcoeff = (d > 3) ? 6 : 18;
 	    `else 
-	        _bcoeff = (d <= 3) ? 6 : 8;
+	        _bcoeff = 6;
 	    `endif
 	`endif
 endfunction

@@ -6,7 +6,7 @@ module tb_aes_sbox ();
     localparam N = 2;
     localparam PIPELINED = 1;
     localparam EIGHT_STAGED = 0;
-    localparam SHARES = 3; // change it to test different cases
+    localparam SHARES = 4; // change it to test different cases
 
     // General signals
 	reg ClkxCI;
@@ -14,19 +14,7 @@ module tb_aes_sbox ();
     `include "blind.vh"
     localparam blind_n_rnd = _blind_nrnd(SHARES);
     reg [coeff*SHARES*(SHARES-1)-1 : 0] RandomZ;
-`ifndef OPTO1O2
-    `ifndef RAND_OPT
-        localparam bcoeff = 18;
-    `else 
-        localparam bcoeff = 8;
-    `endif
-`else
-    `ifndef RAND_OPT
-        parameter bcoeff = SHARES > 3 ? 6 : 18;
-    `else 
-        parameter bcoeff = SHARES <= 3 ? 6 : 8;
-    `endif
-`endif
+    localparam bcoeff = _bcoeff(SHARES);
 
     reg [bcoeff*blind_n_rnd-1:0] RandomB;
     wire [8*SHARES-1 : 0] _XxDI;

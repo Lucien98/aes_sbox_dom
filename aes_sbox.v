@@ -498,7 +498,7 @@ else if (stage2gf4_type == 1) begin
         ._Z2xDI(_Zgf2_3xDI),
         ._Z3xDI(_Zgf2_4xDI),
         ._Z4xDI(_Zgf2_5xDI),
-        ._BxDI(_Bgf2_2xDI),
+        ._BxDI(_Bgf2_1xDI),
         ._Q1xDO(_InvOutLSBLSB),
         ._Q2xDO(_InvOutLSBMSB),
         ._Q3xDO(_InvOutMSBLSB),

@@ -42,11 +42,7 @@ input [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI; // for 0 * y0
 input [SHARES*(SHARES-1)-1 : 0] _Zinv1xDI; // for inverter
 input [SHARES*(SHARES-1)-1 : 0] _Zinv2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zinv3xDI;
-input [(2+bcoeff)*blind_n_rnd-1 : 0] _BxDI; // for inverter
-// input [bcoeff*blind_n_rnd-1 : 0] _Binv2xDI; // ...
-// `ifndef RAND_OPT
-// input [2*blind_n_rnd-1 : 0] _Binv3xDI; // ...
-// `endif
+input [bcoeff*blind_n_rnd-1 : 0] _BxDI; // for inverter
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [7:0] XxDI [SHARES-1 : 0];
@@ -333,7 +329,7 @@ end
         ._Zmul1xDI(_Zinv1xDI),
         ._Zmul2xDI(_Zinv2xDI),
         ._Zmul3xDI(_Zinv3xDI),
-        ._Bmul1xDI(_BxDI[0 +: (invbcoeff + 2) * blind_n_rnd]),
+        ._Bmul1xDI(_BxDI[0 +: invbcoeff  * blind_n_rnd]),
         // ._Bmul2xDI(_Binv2xDI),
 // `ifndef RAND_OPT
 //         ._Bmul3xDI(_Binv3xDI),

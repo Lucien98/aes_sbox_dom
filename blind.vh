@@ -16,15 +16,15 @@ function integer _bcoeff(input integer d);
 begin
     `ifndef OPTO1O2
         `ifndef RAND_OPT
-            _bcoeff = 4;
+            _bcoeff = 6;
         `else
-            _bcoeff = 2;
+            _bcoeff = 4;
         `endif 
     `else
         `ifndef RAND_OPT
-            _bcoeff = 4;
+            _bcoeff = 6;
         `else
-            _bcoeff = (d <= 3 ? 4 : 2);
+            _bcoeff = (d <= 3 ? 6 : 4);
         `endif 
     `endif
 end
@@ -34,15 +34,15 @@ function integer _invbcoeff(input integer d);
 begin
     `ifndef OPTO1O2
         `ifndef RAND_OPT
-            _invbcoeff = 4;
+            _invbcoeff = 6;
         `else
-            _invbcoeff = 2;
+            _invbcoeff = 4;
         `endif 
     `else
         `ifndef RAND_OPT
-            _invbcoeff = (d <= 3 ? 2 : 4);
+            _invbcoeff = (d <= 3 ? 2 : 6);
         `else
-            _invbcoeff = 2;
+            _invbcoeff = (d <= 3 ? 2 : 4);
         `endif 
     `endif
 end

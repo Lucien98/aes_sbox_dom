@@ -23,7 +23,6 @@ module inverter #(
 
 `include "blind.vh"
 localparam blind_n_rnd = _blind_nrnd(SHARES);
-localparam bcoeff = _bcoeff(SHARES);
 localparam invbcoeff = _invbcoeff(SHARES);
 
 input ClkxCI;
@@ -32,8 +31,7 @@ input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
-input [(invbcoeff+2)*blind_n_rnd-1 : 0] _Bmul1xDI;
-// input [bcoeff*blind_n_rnd-1 : 0] _Bmul2xDI;
+input [invbcoeff*blind_n_rnd-1 : 0] _Bmul1xDI;
 output [4*SHARES-1 : 0] _QxDO;
 
 wire [3:0] XxDI [SHARES-1 : 0];

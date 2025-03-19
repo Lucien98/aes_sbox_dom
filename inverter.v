@@ -32,7 +32,7 @@ input [4*SHARES-1 : 0] _XxDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul1xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul2xDI;
 input [SHARES*(SHARES-1)-1 : 0] _Zmul3xDI;
-input [invbcoeff*blind_n_rnd-1 : 0] _Bmul1xDI;
+input [(invbcoeff+2)*blind_n_rnd-1 : 0] _Bmul1xDI;
 // input [bcoeff*blind_n_rnd-1 : 0] _Bmul2xDI;
 output [4*SHARES-1 : 0] _QxDO;
 

@@ -28,7 +28,7 @@ input [bcoeff*blind_n_rnd-1:0] RandomB;
 output [8*SHARES-1 : 0] _QxDO;
 
 wire [(coeff-9)*SHARES*(SHARES-1)-1 : 0] _Zmul1xDI = RandomZ[9*n_random_z+:(coeff-9)*n_random_z]; // for y1 * y0
-wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI = RandomZ[9*n_random_z+:(coeff-9)*n_random_z]; // for 0 * y1
+wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul2xDI = RandomZ[7*n_random_z+:2*n_random_z]; // for 0 * y1
 wire [2*SHARES*(SHARES-1)-1 : 0] _Zmul3xDI = RandomZ[5*n_random_z+:2*n_random_z]; // for 0 * y0
 
 
@@ -44,6 +44,7 @@ wire [4*blind_n_rnd-1 : 0] _Bgf4_1xDI = RandomB[0*blind_n_rnd +: 4*blind_n_rnd];
 
 wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI = RandomB[4*blind_n_rnd +: 2*blind_n_rnd]; // for mul_gf2
 
+/*
 `ifndef OPTO1O2
     wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
     `define NOT_OPTO1O2
@@ -57,13 +58,14 @@ wire [2*blind_n_rnd-1 : 0] _Bgf2_1xDI = RandomB[4*blind_n_rnd +: 2*blind_n_rnd];
 `ifdef DEFBgf2_2
 wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
 `endif
-
-`ifdef NOT_OPTO1O2
+*/
+`ifndef OPTO1O2
     `ifndef RAND_OPT
         wire [4*blind_n_rnd-1 : 0] _Bgf4_2xDI = RandomB[14*blind_n_rnd +: 4*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_3xDI = RandomB[12*blind_n_rnd +: 2*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_4xDI = RandomB[10*blind_n_rnd +: 2*blind_n_rnd];
         wire [2*blind_n_rnd-1 : 0] _Bgf2_5xDI = RandomB[8*blind_n_rnd +: 2*blind_n_rnd];
+        wire [2*blind_n_rnd-1 : 0] _Bgf2_2xDI = RandomB[6*blind_n_rnd +: 2*blind_n_rnd];
     `endif
     `undef NOT_OPTO1O2  // 避免宏污染
 `endif

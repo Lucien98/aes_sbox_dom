@@ -1,3 +1,21 @@
+// 
+// Copyright (C) 2025 Feng Zhou, Gehui Yang
+// 
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// 
+
 module lin_map
 #
 (
@@ -80,24 +98,6 @@ else if (MATRIX_SEL == 2) begin
 	assign DataOutxDO = DataInxDI;
 end
 else if (MATRIX_SEL == 3) begin
-    // assign R1 =  DataInxDI[6] ^ DataInxDI[3];
-	// assign R2 =  DataInxDI[4] ^ DataInxDI[1];
-	// assign R3 =  DataInxDI[7] ^ DataInxDI[0];
-	// assign R4 =  DataInxDI[5] ^ DataInxDI[1];
-	// assign R5 =  DataInxDI[5] ^ R1;
-	// assign R6 =  DataInxDI[5] ^ DataInxDI[7];
-	// assign R7 =  DataInxDI[2] ^ R5;
-	// assign R8 =  DataInxDI[1] ^ DataInxDI[6];
-	// assign R9 =  DataInxDI[1] ^ R3;
-	
-	// assign B[7] = R2;
-	// assign B[6] = R5 ^ R9;
-	// assign B[5] = R3 ^ R7;
-	// assign B[4] = R8;
-	// assign B[3] = R2 ^ R7;
-	// assign B[2] = R2 ^ R6;
-	// assign B[1] = R4;
-	// assign B[0] = DataOutxDO[2];
     wire x0, x1, x2, x3, x4, x5, x6, x7;
     assign {x7, x6, x5, x4, x3, x2, x1, x0} = DataInxDI;
 

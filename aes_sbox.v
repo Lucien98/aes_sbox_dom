@@ -1,3 +1,21 @@
+// 
+// Copyright (C) 2025 Feng Zhou, Gehui Yang
+// 
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// 
+
 module aes_sbox #(
     parameter PIPELINED = 1, // 1: yes
     parameter SHARES = 2
@@ -160,12 +178,6 @@ for (i = 0; i < SHARES; i=i+1) begin
     assign _mappedxD[8*i +: 8] = mappedxDP[i];
 end
 
-shblk2shbit #(.d(SHARES),.width(8))
-switch_encoding_out (
-    .shblk(_mappedxD),
-    .shbit(_mappedxD_bit)
-);
-
 `ifndef FV
 // Output
 for (i = 0; i < SHARES; i = i + 1) begin
@@ -240,7 +252,7 @@ if (SHARES > 1 && PIPELINED == 1) begin
     // Generate instances per share...
     for (i = 0; i < SHARES; i = i + 1) begin
         // Liear mapping at input
-`ifndef NOIA
+`ifdef IA
         lin_map #(.MATRIX_SEL(1))
 `else
         lin_map #(.MATRIX_SEL(2))

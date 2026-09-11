@@ -77,10 +77,10 @@ for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
     end
 end
 
-// The linear part L(x_i,y_i)=scale(x_i+y_i) is registered at the same
-// boundary as in the canonical DOM-dep construction.  Only the redundant
-// diagonal x_i*b_i field multiplication is absorbed into the post-register
-// domain multiplication.
+// The redundant diagonal x_i*b_i field multiplication is absorbed into the
+// post-register domain multiplication.  The linear part
+// L(x_i,y_i)=scale(x_i+y_i) is also evaluated from registered operands, so it
+// does not require an additional register stage.
 
 if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
     reg  [1:0] BlindedYxDP [SHARES-1 : 0];
@@ -91,8 +91,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
     wire [1:0] YxD [SHARES-1 : 0];
 
     wire [1:0] LinearInxD [SHARES-1 : 0];
-    wire [1:0] LinearxDN [SHARES-1 : 0];
-    reg  [1:0] LinearxDP [SHARES-1 : 0];
+    wire [1:0] LinearxD [SHARES-1 : 0];
 
     wire [1:0] XtimesMergedYxD [SHARES-1 : 0];
     wire [1:0] XtimesBxD [SHARES-1 : 0];
@@ -116,10 +115,10 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
     end
 
     for (i = 0; i < SHARES; i=i+1) begin
-        assign LinearInxD[i] = XxDI[i] ^ YxDI[i];
+        assign LinearInxD[i] = XxD[i] ^ YxD[i];
         scale linear_part (
             .a(LinearInxD[i]),
-            .q(LinearxDN[i])
+            .q(LinearxD[i])
         );
 
         gf2_mul #(.N(2)) x_times_merged_y (
@@ -135,7 +134,7 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
         );
 
         assign XtimesBRemaskedxDN[i] = XtimesBxD[i] ^ ZxDI[0];
-        assign QxDO[i] = XtimesMergedYxD[i] ^ XtimesBRemaskedxDP[i] ^ LinearxDP[i];
+        assign QxDO[i] = XtimesMergedYxD[i] ^ XtimesBRemaskedxDP[i] ^ LinearxD[i];
     end
 
     always @(posedge ClkxCI) begin : proc_first_order_registers
@@ -143,7 +142,6 @@ if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
         for (k = 0; k < SHARES; k=k+1) begin
             BlindedYxDP[k] <= BlindedYxDN[k];
             XtimesBRemaskedxDP[k] <= XtimesBRemaskedxDN[k];
-            LinearxDP[k] <= LinearxDN[k];
             if (PIPELINED == 1) begin
                 XxDP[k] <= XxDI[k];
                 YxDP[k] <= YxDI[k];
@@ -162,9 +160,9 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin : gen_general
     wire [1:0] MergedYxD [SHARES-1 : 0];
     wire [1:0] DomainTermxD [SHARES-1 : 0];
 
+    wire [1:0] RecoveredYxD [SHARES-1 : 0];
     wire [1:0] LinearInxD [SHARES-1 : 0];
-    wire [1:0] LinearxDN [SHARES-1 : 0];
-    reg  [1:0] LinearxDP [SHARES-1 : 0];
+    wire [1:0] LinearxD [SHARES-1 : 0];
 
     wire [1:0] XiMulBj [SHARES*SHARES-1 : 0];
     wire [1:0] CrossRemaskedxDN [SHARES*SHARES-1 : 0];
@@ -198,10 +196,14 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin : gen_general
             .QxDO(DomainTermxD[i])
         );
 
-        assign LinearInxD[i] = XxDI[i] ^ YxDI[i];
+        // Recover the registered y_i share as [y_i+b_i] + [b_i].
+        // This lets the linear term be evaluated after the register boundary
+        // without introducing a separate register for L(x_i,y_i).
+        assign RecoveredYxD[i] = BlindedYxDP[i] ^ BxDP[i];
+        assign LinearInxD[i] = XxD[i] ^ RecoveredYxD[i];
         scale linear_part (
             .a(LinearInxD[i]),
-            .q(LinearxDN[i])
+            .q(LinearxD[i])
         );
     end
 
@@ -230,7 +232,7 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin : gen_general
         integer k;
         integer l;
         for (k = 0; k < SHARES; k=k+1) begin
-            ResultxD[k] = DomainTermxD[k] ^ LinearxDP[k];
+            ResultxD[k] = DomainTermxD[k] ^ LinearxD[k];
             for (l = 0; l < SHARES; l=l+1) begin
                 if (k != l) begin
                     ResultxD[k] = ResultxD[k] ^ CrossRemaskedxDP[SHARES*k+l];
@@ -249,7 +251,6 @@ if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin : gen_general
         for (k = 0; k < SHARES; k=k+1) begin
             BlindedYxDP[k] <= YxDI[k] ^ BxDI[k];
             BxDP[k] <= BxDI[k];
-            LinearxDP[k] <= LinearxDN[k];
             if (PIPELINED == 1) begin
                 XxDP[k] <= XxDI[k];
             end

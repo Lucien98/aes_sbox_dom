@@ -41,8 +41,8 @@ input ClkxCI;
 input [2*SHARES-1 : 0] _X1xDI;
 input [2*SHARES-1 : 0] _X2xDI;
 input [2*SHARES-1 : 0] _YxDI;
-input [1*SHARES*(SHARES-1)-1 : 0] _Z1xDI;
-input [1*SHARES*(SHARES-1)-1 : 0] _Z2xDI;
+input [SHARES*(SHARES-1)-1 : 0] _Z1xDI;
+input [SHARES*(SHARES-1)-1 : 0] _Z2xDI;
 input [2*blind_n_rnd-1 : 0] _BxDI;
 output [2*SHARES-1 : 0] _Q1xDO;
 output [2*SHARES-1 : 0] _Q2xDO;
@@ -52,7 +52,7 @@ wire [1:0] X2xDI [SHARES-1 : 0];
 wire [1:0] YxDI [SHARES-1 : 0];
 wire [1:0] Z1xDI [(SHARES*(SHARES-1)/2)-1 : 0];
 wire [1:0] Z2xDI [(SHARES*(SHARES-1)/2)-1 : 0];
-wire [1:0] BxDI [blind_n_rnd-1 : 0];
+wire [1:0] BxDI [SHARES-1 : 0];
 wire [1:0] Q1xDO [SHARES-1 : 0];
 wire [1:0] Q2xDO [SHARES-1 : 0];
 
@@ -63,17 +63,15 @@ for (i = 0; i < SHARES; i=i+1) begin
         assign X1xDI[i][j] = _X1xDI[i*2+j];
         assign X2xDI[i][j] = _X2xDI[i*2+j];
         assign YxDI[i][j] = _YxDI[i*2+j];
-        // assign BxDI[i][j] = _BxDI[i*2+j];
         assign _Q1xDO[i*2+j] = Q1xDO[i][j];
         assign _Q2xDO[i*2+j] = Q2xDO[i][j];
     end
 end
 
-if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
-    for (i = 0; i < SHARES-1; i=i+1) begin
-        for (j = 0; j < 2; j=j+1) begin
-            assign BxDI[i][j] = _BxDI[i*1+j];
-        end
+if (SHARES == 2) begin
+    for (j = 0; j < 2; j=j+1) begin
+        assign BxDI[0][j] = _BxDI[j];
+        assign BxDI[1][j] = _BxDI[j];
     end
 end
 else begin
@@ -81,9 +79,8 @@ else begin
         for (j = 0; j < 2; j=j+1) begin
             assign BxDI[i][j] = _BxDI[i*2+j];
         end
-    end    
+    end
 end
-
 
 for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
     for (j = 0; j < 2; j=j+1) begin
@@ -92,271 +89,216 @@ for (i = 0; i < SHARES*(SHARES-1)/2; i=i+1) begin
     end
 end
 
-// Intermediates
-// Blinded Y values
-reg [1:0] BlindedYxDN [SHARES-1 : 0];
-reg [1:0] BlindedYxDP [SHARES-1 : 0];
-// Sum of blinded Y shares
-reg [1:0] SumBlindedYxD;
-// x *( sum(y+b) ) signal
-wire [1:0] X1timesSumBlindedYxD [SHARES-1 : 0];
-wire [1:0] X2timesSumBlindedYxD [SHARES-1 : 0];
-// x * b signal
-wire [1:0] X1timesBxD [SHARES-1 : 0];
-wire [1:0] X2timesBxD [SHARES-1 : 0];
-wire [2*SHARES-1 : 0] _X1timesBxD;
-wire [2*SHARES-1 : 0] _X2timesBxD;
-// X pipelined
-reg [1:0] X1xDP [SHARES-1 : 0];
-reg [1:0] X2xDP [SHARES-1 : 0];
-// X input for GF mults => x * (y+z)
-reg [1:0] X1pipelinedOrNotxS [SHARES-1 : 0];
-reg [1:0] X2pipelinedOrNotxS [SHARES-1 : 0];
+// The paired multiplier shares the blinded Y and blinding-value registers.
+// Each X operand still has its own remasked cross-domain terms.
 
-// For first-order optimizaion only:
-wire [1:0] X1timesYxS [SHARES-1 : 0];
-wire [1:0] X1timesBlindedY [SHARES-1 : 0];
-wire [1:0] X2timesYxS [SHARES-1 : 0];
-wire [1:0] X2timesBlindedY [SHARES-1 : 0];
-// Y pipelined
-reg [1:0] YxDP [SHARES-1 : 0];
-// X and Y multiplier inputs depending on pipelinign selection
-wire [1:0] X1xD [SHARES-1 : 0];
-wire [1:0] X2xD [SHARES-1 : 0];
-wire [1:0] YxD [SHARES-1 : 0];
-// X times blinding value B
-wire [1:0] X1_times_BxD [SHARES-1 : 0];
-wire [1:0] X1_times_B_remaskedxDN [SHARES-1 : 0];
-reg [1:0] X1_times_B_remaskedxDP [SHARES-1 : 0];
+if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin : gen_first_order
+    reg  [1:0] BlindedYxDP [SHARES-1 : 0];
+    wire [1:0] BlindedYxDN [SHARES-1 : 0];
+    reg  [1:0] X1xDP [SHARES-1 : 0];
+    reg  [1:0] X2xDP [SHARES-1 : 0];
+    reg  [1:0] YxDP [SHARES-1 : 0];
+    wire [1:0] X1xD [SHARES-1 : 0];
+    wire [1:0] X2xD [SHARES-1 : 0];
+    wire [1:0] YxD [SHARES-1 : 0];
 
-wire [1:0] X2_times_BxD [SHARES-1 : 0];
-wire [1:0] X2_times_B_remaskedxDN [SHARES-1 : 0];
-reg [1:0] X2_times_B_remaskedxDP [SHARES-1 : 0];
+    wire [1:0] X1timesMergedYxD [SHARES-1 : 0];
+    wire [1:0] X2timesMergedYxD [SHARES-1 : 0];
+    wire [1:0] X1timesBxD [SHARES-1 : 0];
+    wire [1:0] X2timesBxD [SHARES-1 : 0];
+    wire [1:0] X1timesBRemaskedxDN [SHARES-1 : 0];
+    wire [1:0] X2timesBRemaskedxDN [SHARES-1 : 0];
+    reg  [1:0] X1timesBRemaskedxDP [SHARES-1 : 0];
+    reg  [1:0] X2timesBRemaskedxDP [SHARES-1 : 0];
 
+    assign BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
+    assign BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
 
-for (i = 0; i < SHARES; i=i+1) begin
-    for (j = 0; j < 2; j=j+1) begin
-        assign X1timesBxD[i][j] = _X1timesBxD[i*2+j];
-        assign X2timesBxD[i][j] = _X2timesBxD[i*2+j];
-    end
-end
-
-
-// First_order optimized variant
-if (FIRST_ORDER_OPTIMIZATION == 1 && SHARES == 2) begin
-    // Blinding of Y
-    // process blind_y_p
-
-    //always @(BxDI or X_times_BxD or X1xDI or X1xDP or YxDI or YxDP or ZxDI or XtimesYxS or XtimesBlindedY or X_times_B_remaskedxDP) begin
-    always @(*) begin
-        BlindedYxDN[1] = YxDI[0] ^ BxDI[0];
-        BlindedYxDN[0] = YxDI[1] ^ BxDI[0];
-    end
-
-    // Select inputs for multipliers depending if pipelining is used
     if (PIPELINED == 1) begin
-        for (i = 0; i < SHARES; i = i + 1) begin
+        for (i = 0; i < SHARES; i=i+1) begin
             assign X1xD[i] = X1xDP[i];
             assign X2xD[i] = X2xDP[i];
             assign YxD[i] = YxDP[i];
         end
     end
     else begin
-        for (i = 0; i < SHARES; i = i + 1) begin
+        for (i = 0; i < SHARES; i=i+1) begin
             assign X1xD[i] = X1xDI[i];
             assign X2xD[i] = X2xDI[i];
             assign YxD[i] = YxDI[i];
         end
     end
 
-    // Remask X * B ... + Z
-    assign X1_times_B_remaskedxDN[0] = X1_times_BxD[0] ^ Z1xDI[0];
-    assign X1_times_B_remaskedxDN[1] = X1_times_BxD[1] ^ Z1xDI[0];
-
-    assign X2_times_B_remaskedxDN[0] = X2_times_BxD[0] ^ Z2xDI[0];
-    assign X2_times_B_remaskedxDN[1] = X2_times_BxD[1] ^ Z2xDI[0];
-
-    // Output
-    assign Q1xDO[0] = X1timesYxS[0] /*^ X1timesBlindedY[0]*/ ^ X1_times_B_remaskedxDP[0];
-    assign Q1xDO[1] = X1timesYxS[1] /*^ X1timesBlindedY[1]*/ ^ X1_times_B_remaskedxDP[1];
-    assign Q2xDO[0] = X2timesYxS[0] /*^ X2timesBlindedY[0]*/ ^ X2_times_B_remaskedxDP[0];
-    assign Q2xDO[1] = X2timesYxS[1] /*^ X2timesBlindedY[1]*/ ^ X2_times_B_remaskedxDP[1];
-
-
-    // Remask multiplication results from different domains
-    // process x_times_b_register_p
-    // always @(posedge ClkxCI or negedge RstxBI) begin : proc1_
-    always @(posedge ClkxCI) begin : proc_
-        // if (~RstxBI) begin // asynchronous reset (active low)
-        //     X1_times_B_remaskedxDP[0] <= 4'b0000;
-        //     X1_times_B_remaskedxDP[1] <= 4'b0000;
-        //     X2_times_B_remaskedxDP[0] <= 4'b0000;
-        //     X2_times_B_remaskedxDP[1] <= 4'b0000;
-        // end
-        // else begin // rising clock edge
-            X1_times_B_remaskedxDP[0] <= X1_times_B_remaskedxDN[0];
-            X1_times_B_remaskedxDP[1] <= X1_times_B_remaskedxDN[1];
-            X2_times_B_remaskedxDP[0] <= X2_times_B_remaskedxDN[0];
-            X2_times_B_remaskedxDP[1] <= X2_times_B_remaskedxDN[1];
-        // end
-    end
-
-    // Multipliers
-    // the first instance
-    for (i = 0; i < SHARES; i = i + 1) begin
-        gf2_mul #(.N(2)) x1_times_y(
+    for (i = 0; i < SHARES; i=i+1) begin
+        // This merge was already used by the previous paired first-order RTL.
+        gf2_mul #(.N(2)) x1_times_merged_y (
             .AxDI(X1xD[i]),
-            .BxDI(YxD[i]^BlindedYxDP[i]),
-            .QxDO(X1timesYxS[i])
+            .BxDI(YxD[i] ^ BlindedYxDP[i]),
+            .QxDO(X1timesMergedYxD[i])
+        );
+        gf2_mul #(.N(2)) x2_times_merged_y (
+            .AxDI(X2xD[i]),
+            .BxDI(YxD[i] ^ BlindedYxDP[i]),
+            .QxDO(X2timesMergedYxD[i])
         );
 
-        // gf2_mul #(.N(4)) x1_times_blinded_y(
-        //     .AxDI(X1xD[i]),
-        //     .BxDI(BlindedYxDP[i]),
-        //     .QxDO(X1timesBlindedY[i])
-        // );
-
-        gf2_mul #(.N(2)) x1_times_b(
+        gf2_mul #(.N(2)) x1_times_b (
             .AxDI(X1xDI[i]),
             .BxDI(BxDI[0]),
-            .QxDO(X1_times_BxD[i])
+            .QxDO(X1timesBxD[i])
         );
-    end
-    // the second instance
-    for (i = 0; i < SHARES; i = i + 1) begin
-        gf2_mul #(.N(2)) x2_times_y(
-            .AxDI(X2xD[i]),
-            .BxDI(YxD[i]^BlindedYxDP[i]),
-            .QxDO(X2timesYxS[i])
-        );
-
-        // gf2_mul #(.N(4)) x2_times_blinded_y(
-        //     .AxDI(X2xD[i]),
-        //     .BxDI(BlindedYxDP[i]),
-        //     .QxDO(X2timesBlindedY[i])
-        // );
-
-        gf2_mul #(.N(2)) x2_times_b(
+        gf2_mul #(.N(2)) x2_times_b (
             .AxDI(X2xDI[i]),
             .BxDI(BxDI[0]),
-            .QxDO(X2_times_BxD[i])
+            .QxDO(X2timesBxD[i])
         );
-    end
-end
 
-
-
-// NO First_order optimized variant
-if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin
-    reg [1:0] SumBlindedY;
-    integer k;
-    
-    //always @(BlindedYxDP or BxDI or X1xDI or X1xDP or YxDI) begin
-    always @(*) begin
-        for (k = 0; k < SHARES; k = k + 1) begin
-            BlindedYxDN[k] = BlindedYxDP[k];
-        end
-        SumBlindedY = 2'b0000;
-        // per share
-        for (k = 0; k < SHARES; k = k + 1) begin
-            BlindedYxDN[k] = YxDI[k] ^ BxDI[k];
-            // Sum of blinded Y
-            SumBlindedY = SumBlindedY ^ BlindedYxDP[k];
-            // X input for GF mults => x * (y + z)
-            if (PIPELINED == 1) begin
-                X1pipelinedOrNotxS[k] = X1xDP[k];
-                X2pipelinedOrNotxS[k] = X2xDP[k];
-            end
-            else begin
-                X1pipelinedOrNotxS[k] = X1xDI[k];
-                X2pipelinedOrNotxS[k] = X2xDI[k];
-            end
-        end
-        SumBlindedYxD = SumBlindedY;
+        assign X1timesBRemaskedxDN[i] = X1timesBxD[i] ^ Z1xDI[0];
+        assign X2timesBRemaskedxDN[i] = X2timesBxD[i] ^ Z2xDI[0];
+        assign Q1xDO[i] = X1timesMergedYxD[i] ^ X1timesBRemaskedxDP[i];
+        assign Q2xDO[i] = X2timesMergedYxD[i] ^ X2timesBRemaskedxDP[i];
     end
 
-    // Generate multipliers calculating x * (sum(y+b))
-    for (i = 0; i < SHARES; i = i + 1) begin
-            gf2_mul #(.N(2)) gf2_mul_1(
-            .AxDI(X1pipelinedOrNotxS[i]),
-            .BxDI(SumBlindedYxD),
-            .QxDO(X1timesSumBlindedYxD[i])
-        );
-    end
-
-    for (i = 0; i < SHARES; i = i + 1) begin
-            gf2_mul #(.N(2)) gf2_mul_2(
-            .AxDI(X2pipelinedOrNotxS[i]),
-            .BxDI(SumBlindedYxD),
-            .QxDO(X2timesSumBlindedYxD[i])
-        );
-    end
-
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_1(
-        .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
-        ._XxDI(_X1xDI),
-        ._YxDI(_BxDI),
-        ._ZxDI(_Z1xDI),
-        ._QxDO(_X1timesBxD)
-    );
-
-    shared_mul_gf2 #(.PIPELINED(PIPELINED), .SHARES(SHARES)) shared_mul_gf2_2(
-        .ClkxCI(ClkxCI),
-        // .RstxBI(RstxBI),
-        ._XxDI(_X2xDI),
-        ._YxDI(_BxDI),
-        ._ZxDI(_Z2xDI),
-        ._QxDO(_X2timesBxD)
-    );
-
-    // Output signal x*y = x*(y+b) + x*b
-    for (i = 0; i < SHARES; i = i + 1) begin
-        assign Q1xDO[i] = X1timesSumBlindedYxD[i] ^ X1timesBxD[i];
-        assign Q2xDO[i] = X2timesSumBlindedYxD[i] ^ X2timesBxD[i];
-    end
-end
-
-
-// General stuff used for all variants:
-// Use pipelining --> X needs to be registered
-if (PIPELINED == 1) begin
-    integer k;
-    // always @(posedge ClkxCI or negedge RstxBI) begin : proc2_
-    always @(posedge ClkxCI) begin : proc_
-        // if (~RstxBI) begin // asynchronous reset (active low)
-        //     for (k = 0; k < SHARES; k = k + 1) begin
-        //         X1xDP[k] = 4'b0000;
-        //         X2xDP[k] = 4'b0000;
-        //         YxDP[k] = 4'b0000;
-        //     end
-        // end
-        // else begin // rising clock edge
-            for (k = 0; k < SHARES; k = k + 1) begin
-                X1xDP[k] = X1xDI[k];
-                X2xDP[k] = X2xDI[k];
-                YxDP[k] = YxDI[k];
-            end
-        // end
-    end
-end
-
-// Blinding register process
-// always @(posedge ClkxCI or negedge RstxBI) begin : proc3_
-always @(posedge ClkxCI) begin : proc_
-    integer k;
-    // if (~RstxBI) begin // asynchronous reset (active low)
-    //     for (k = 0; k < SHARES; k = k + 1) begin
-    //         BlindedYxDP[k] <= 4'b0000;
-    //     end
-    // end
-    // else begin // rising clock edge
-        for (k = 0; k < SHARES; k = k + 1) begin
+    always @(posedge ClkxCI) begin : proc_first_order_registers
+        integer k;
+        for (k = 0; k < SHARES; k=k+1) begin
             BlindedYxDP[k] <= BlindedYxDN[k];
+            X1timesBRemaskedxDP[k] <= X1timesBRemaskedxDN[k];
+            X2timesBRemaskedxDP[k] <= X2timesBRemaskedxDN[k];
+            if (PIPELINED == 1) begin
+                X1xDP[k] <= X1xDI[k];
+                X2xDP[k] <= X2xDI[k];
+                YxDP[k] <= YxDI[k];
+            end
         end
-    // end
+    end
 end
 
+if (FIRST_ORDER_OPTIMIZATION == 0 || SHARES > 2) begin : gen_general
+    reg [1:0] BlindedYxDP [SHARES-1 : 0];
+    reg [1:0] BxDP [SHARES-1 : 0];
+    reg [1:0] X1xDP [SHARES-1 : 0];
+    reg [1:0] X2xDP [SHARES-1 : 0];
+    wire [1:0] X1xD [SHARES-1 : 0];
+    wire [1:0] X2xD [SHARES-1 : 0];
 
-    
+    reg [1:0] SumBlindedY;
+    wire [1:0] MergedYxD [SHARES-1 : 0];
+    wire [1:0] DomainTerm1xD [SHARES-1 : 0];
+    wire [1:0] DomainTerm2xD [SHARES-1 : 0];
+
+    wire [1:0] X1iMulBj [SHARES*SHARES-1 : 0];
+    wire [1:0] X2iMulBj [SHARES*SHARES-1 : 0];
+    wire [1:0] Cross1RemaskedxDN [SHARES*SHARES-1 : 0];
+    wire [1:0] Cross2RemaskedxDN [SHARES*SHARES-1 : 0];
+    reg  [1:0] Cross1RemaskedxDP [SHARES*SHARES-1 : 0];
+    reg  [1:0] Cross2RemaskedxDP [SHARES*SHARES-1 : 0];
+    reg  [1:0] Result1xD [SHARES-1 : 0];
+    reg  [1:0] Result2xD [SHARES-1 : 0];
+
+    if (PIPELINED == 1) begin
+        for (i = 0; i < SHARES; i=i+1) begin
+            assign X1xD[i] = X1xDP[i];
+            assign X2xD[i] = X2xDP[i];
+        end
+    end
+    else begin
+        for (i = 0; i < SHARES; i=i+1) begin
+            assign X1xD[i] = X1xDI[i];
+            assign X2xD[i] = X2xDI[i];
+        end
+    end
+
+    always @(*) begin : proc_sum_blinded_y
+        integer k;
+        SumBlindedY = 2'b00;
+        for (k = 0; k < SHARES; k=k+1) begin
+            SumBlindedY = SumBlindedY ^ BlindedYxDP[k];
+        end
+    end
+
+    for (i = 0; i < SHARES; i=i+1) begin
+        assign MergedYxD[i] = SumBlindedY ^ BxDP[i];
+        gf2_mul #(.N(2)) merged_domain_mul_1 (
+            .AxDI(X1xD[i]),
+            .BxDI(MergedYxD[i]),
+            .QxDO(DomainTerm1xD[i])
+        );
+        gf2_mul #(.N(2)) merged_domain_mul_2 (
+            .AxDI(X2xD[i]),
+            .BxDI(MergedYxD[i]),
+            .QxDO(DomainTerm2xD[i])
+        );
+    end
+
+    for (i = 0; i < SHARES; i=i+1) begin
+        for (j = 0; j < SHARES; j=j+1) begin
+            if (i != j) begin : gen_cross_domain
+                gf2_mul #(.N(2)) cross_domain_mul_1 (
+                    .AxDI(X1xDI[i]),
+                    .BxDI(BxDI[j]),
+                    .QxDO(X1iMulBj[SHARES*i+j])
+                );
+                gf2_mul #(.N(2)) cross_domain_mul_2 (
+                    .AxDI(X2xDI[i]),
+                    .BxDI(BxDI[j]),
+                    .QxDO(X2iMulBj[SHARES*i+j])
+                );
+
+                if (j > i) begin
+                    assign Cross1RemaskedxDN[SHARES*i+j] =
+                        X1iMulBj[SHARES*i+j] ^ Z1xDI[i + j*(j-1)/2];
+                    assign Cross2RemaskedxDN[SHARES*i+j] =
+                        X2iMulBj[SHARES*i+j] ^ Z2xDI[i + j*(j-1)/2];
+                end
+                else begin
+                    assign Cross1RemaskedxDN[SHARES*i+j] =
+                        X1iMulBj[SHARES*i+j] ^ Z1xDI[j + i*(i-1)/2];
+                    assign Cross2RemaskedxDN[SHARES*i+j] =
+                        X2iMulBj[SHARES*i+j] ^ Z2xDI[j + i*(i-1)/2];
+                end
+            end
+        end
+    end
+
+    always @(*) begin : proc_compress
+        integer k;
+        integer l;
+        for (k = 0; k < SHARES; k=k+1) begin
+            Result1xD[k] = DomainTerm1xD[k];
+            Result2xD[k] = DomainTerm2xD[k];
+            for (l = 0; l < SHARES; l=l+1) begin
+                if (k != l) begin
+                    Result1xD[k] = Result1xD[k] ^ Cross1RemaskedxDP[SHARES*k+l];
+                    Result2xD[k] = Result2xD[k] ^ Cross2RemaskedxDP[SHARES*k+l];
+                end
+            end
+        end
+    end
+
+    for (i = 0; i < SHARES; i=i+1) begin
+        assign Q1xDO[i] = Result1xD[i];
+        assign Q2xDO[i] = Result2xD[i];
+    end
+
+    always @(posedge ClkxCI) begin : proc_general_registers
+        integer k;
+        integer l;
+        for (k = 0; k < SHARES; k=k+1) begin
+            BlindedYxDP[k] <= YxDI[k] ^ BxDI[k];
+            BxDP[k] <= BxDI[k];
+            if (PIPELINED == 1) begin
+                X1xDP[k] <= X1xDI[k];
+                X2xDP[k] <= X2xDI[k];
+            end
+            for (l = 0; l < SHARES; l=l+1) begin
+                if (k != l) begin
+                    Cross1RemaskedxDP[SHARES*k+l] <= Cross1RemaskedxDN[SHARES*k+l];
+                    Cross2RemaskedxDP[SHARES*k+l] <= Cross2RemaskedxDN[SHARES*k+l];
+                end
+            end
+        end
+    end
+end
+
 endmodule
